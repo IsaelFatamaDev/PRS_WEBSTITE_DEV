@@ -1,11 +1,86 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserRole } from '../../../core/models/auth.model';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
+  loginForm!: FormGroup;
+  error: string = '';
+  showPassword: boolean = false;
 
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) { }
+
+  ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required]
+    });
+  }
+
+  onSubmit(): void {
+    if (this.loginForm.valid) {
+      const { email, password } = this.loginForm.value;
+      this.authService.login(email, password).subscribe({
+        next: (response) => {
+          // Redirigir según el rol
+          switch (response.user.role) {
+            case UserRole.SUPERADMIN:
+              this.router.navigate(['/super-admin/dashboard']);
+              break;
+            case UserRole.ADMIN:
+              this.router.navigate(['/admin/dashboard']);
+              break;
+            case UserRole.OPERATOR:
+              this.router.navigate(['/admin/dashboard']);
+              break;
+            case UserRole.CLIENT:
+              this.router.navigate(['/client/dashboard']);
+              break;
+            default:
+              this.router.navigate(['/']);
+          }
+        },
+        error: (err) => {
+          this.error = 'Credenciales inválidas';
+          setTimeout(() => {
+            this.error = '';
+          }, 3000);
+        }
+      });
+    } else {
+      this.markFormGroupTouched(this.loginForm);
+    }
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  forgotPassword(): void {
+    this.router.navigate(['/auth/forgot-password']);
+  }
+
+  // Utilidad para marcar todos los campos como tocados
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+
+      if ((control as any).controls) {
+        this.markFormGroupTouched(control as FormGroup);
+      }
+    });
+  }
 }
