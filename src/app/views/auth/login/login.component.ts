@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { AnimationService } from '../../../core/services/animation.service';
 import { UserRole } from '../../../core/models/auth.model';
 
 @Component({
@@ -16,10 +17,10 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   error: string = '';
   showPassword: boolean = false;
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private animationService: AnimationService,
     private router: Router
   ) { }
 
@@ -29,29 +30,28 @@ export class LoginComponent implements OnInit {
       password: ['', Validators.required]
     });
   }
-
   onSubmit(): void {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
       this.authService.login(email, password).subscribe({
         next: (response) => {
-          // Redirigir según el rol
-          switch (response.user.role) {
-            case UserRole.SUPERADMIN:
-              this.router.navigate(['/super-admin/dashboard']);
-              break;
-            case UserRole.ADMIN:
-              this.router.navigate(['/admin/dashboard']);
-              break;
-            case UserRole.OPERATOR:
-              this.router.navigate(['/admin/dashboard']);
-              break;
-            case UserRole.CLIENT:
-              this.router.navigate(['/client/dashboard']);
-              break;
-            default:
-              this.router.navigate(['/']);
-          }
+          this.animationService.showWelcomeAnimation();
+
+          setTimeout(() => {
+            switch (response.user.role) {
+              case UserRole.SUPERADMIN:
+                this.router.navigate(['/super-admin/dashboard']);
+                break;
+              case UserRole.ADMIN:
+                this.router.navigate(['/admin/dashboard']);
+                break;
+              case UserRole.CLIENT:
+                this.router.navigate(['/client/dashboard']);
+                break;
+              default:
+                this.router.navigate(['/']);
+            }
+          }, 2000);
         },
         error: (err) => {
           this.error = 'Credenciales inválidas';
@@ -73,7 +73,6 @@ export class LoginComponent implements OnInit {
     this.router.navigate(['/auth/forgot-password']);
   }
 
-  // Utilidad para marcar todos los campos como tocados
   private markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach(control => {
       control.markAsTouched();

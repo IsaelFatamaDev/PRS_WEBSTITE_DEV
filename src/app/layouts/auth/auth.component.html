@@ -1,1 +1,21 @@
-<p>auth works!</p>
+<div class="flex h-screen auth-layout bg-gray-50">
+    <app-sidebar
+        [isSidebarOpen]="isSidebarOpen"
+        (toggleSidebarEvent)="toggleSidebar()"
+    ></app-sidebar>
+    <div
+        class="flex flex-col flex-1 transition-all duration-300 main-panel"
+        [class.xl:ml-64]="isSidebarOpen"
+        [class.xl:ml-0]="!isSidebarOpen"
+    >
+        <app-header
+            (toggleSidebarEvent)="toggleSidebar()"
+            [isSidebarOpen]="isSidebarOpen"
+        ></app-header>
+        <main class="flex-1 p-4 overflow-y-auto main-content">
+            <div class="w-full">
+                <router-outlet></router-outlet>
+            </div>
+        </main>
+    </div>
+</div>

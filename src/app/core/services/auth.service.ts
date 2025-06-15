@@ -24,14 +24,6 @@ export class AuthService {
     },
     {
       id: '2',
-      email: 'operator@jass.com',
-      password: 'operator123',
-      role: UserRole.OPERATOR,
-      name: 'Operador',
-      organizationId: '1'
-    },
-    {
-      id: '3',
       email: 'client@jass.com',
       password: 'client123',
       role: UserRole.CLIENT,
@@ -39,7 +31,7 @@ export class AuthService {
       organizationId: '1'
     },
     {
-      id: '4',
+      id: '3',
       email: 'superadmin@jass.com',
       password: 'super123',
       role: UserRole.SUPERADMIN,
@@ -89,11 +81,13 @@ export class AuthService {
   }
 
   hasRole(role: UserRole): boolean {
-    return this.currentUserSubject.value?.role === role;
+    const currentUser = this.currentUserSubject.value;
+    return currentUser?.role === role;
   }
 
   hasAnyRole(roles: UserRole[]): boolean {
-    return roles.some(role => this.hasRole(role));
+    const currentUser = this.currentUserSubject.value;
+    return roles.some(role => currentUser?.role === role);
   }
 
   getCurrentUser(): Omit<User, 'password'> | null {
