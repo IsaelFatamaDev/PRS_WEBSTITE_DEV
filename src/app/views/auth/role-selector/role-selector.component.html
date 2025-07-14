@@ -1,0 +1,94 @@
+<div
+     class="flex items-center justify-center min-h-screen p-2 sm:p-4 bg-gradient-to-br from-sky-50 via-white to-sky-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+     <div
+          class="w-full h-screen max-w-sm pr-4 overflow-auto sm:max-w-2xl lg:max-w-4xl scrollbar-thin scrollbar-thumb-sky-200 dark:scrollbar-thumb-gray-700">
+          <div class="mb-6 text-center sm:mb-8">
+               <div class="flex justify-center mb-3 sm:mb-4">
+                    <div
+                         class="flex items-center justify-center w-12 h-12 shadow-lg sm:w-16 sm:h-16 bg-gradient-to-br from-sky-500 to-sky-600 rounded-2xl">
+                         <i class="text-lg text-white sm:text-2xl fas fa-user-shield"></i>
+                    </div>
+               </div>
+               <h1 class="mb-2 text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl dark:text-gray-100">Seleccionar
+                    Rol</h1>
+               <p class="px-2 text-sm text-gray-600 sm:text-base lg:text-lg dark:text-gray-400">
+                    ¡Hola {{ user?.fullName }}! Tienes múltiples roles asignados.
+                    <br class="hidden sm:block">
+                    Selecciona el rol con el que deseas ingresar al sistema.
+               </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 mb-6 sm:gap-6 sm:mb-8 sm:grid-cols-2">
+               <div *ngFor="let role of availableRoles" (click)="selectRole(role)"
+                    class="relative transition-all duration-300 transform cursor-pointer hover:scale-105"
+                    [class.ring-2]="selectedRole === role" [class.sm:ring-4]="selectedRole === role"
+                    [class.ring-sky-500]="selectedRole === role" [class.shadow-2xl]="selectedRole === role">
+                    <div class="p-4 transition-all duration-300 bg-white border border-gray-200 shadow-lg sm:p-6 lg:p-8 dark:bg-gray-800 rounded-2xl hover:shadow-xl dark:border-gray-700"
+                         [class.bg-sky-50]="selectedRole === role" [class.dark:bg-sky-900]="selectedRole === role"
+                         [class.border-sky-300]="selectedRole === role">
+
+                         <div class="flex justify-center mb-4 sm:mb-6">
+                              <div class="flex items-center justify-center w-12 h-12 transition-all duration-300 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl"
+                                   [class.bg-sky-100]="selectedRole !== role"
+                                   [class.dark:bg-gray-700]="selectedRole !== role"
+                                   [class.bg-sky-500]="selectedRole === role" [class.shadow-lg]="selectedRole === role">
+                                   <i [class]="getRoleIcon(role) + ' text-xl sm:text-2xl lg:text-3xl'"
+                                        [class.text-sky-600]="selectedRole !== role"
+                                        [class.dark:text-gray-300]="selectedRole !== role"
+                                        [class.text-white]="selectedRole === role"></i>
+                              </div>
+                         </div>
+
+                         <div class="text-center">
+                              <h3 class="mb-2 text-base font-bold transition-colors duration-300 sm:mb-3 sm:text-lg lg:text-xl"
+                                   [class.text-gray-900]="selectedRole !== role"
+                                   [class.dark:text-gray-100]="selectedRole !== role"
+                                   [class.text-sky-700]="selectedRole === role"
+                                   [class.dark:text-sky-300]="selectedRole === role">
+                                   {{ getRoleDisplayName(role) }}
+                              </h3>
+                              <p class="text-xs leading-relaxed text-gray-600 sm:text-sm dark:text-gray-400">{{
+                                   getRoleDescription(role) }}</p>
+                         </div>
+                         <div class="absolute transition-all duration-300 top-2 right-2 sm:top-4 sm:right-4"
+                              [class.opacity-0]="selectedRole !== role" [class.opacity-100]="selectedRole === role">
+                              <div
+                                   class="flex items-center justify-center w-6 h-6 rounded-full shadow-lg sm:w-8 sm:h-8 bg-sky-500">
+                                   <i class="text-xs text-white sm:text-sm fas fa-check"></i>
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </div>
+
+          <div class="flex flex-col justify-center gap-3 sm:gap-4 sm:flex-row">
+               <button (click)="confirmRoleSelection()" [disabled]="!selectedRole"
+                    class="px-4 py-3 text-sm font-semibold transition-all duration-300 transform sm:px-6 lg:px-8 sm:py-4 sm:text-base lg:text-lg rounded-xl hover:scale-105 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.bg-sky-600]="selectedRole" [class.hover:bg-sky-700]="selectedRole"
+                    [class.text-white]="selectedRole" [class.shadow-lg]="selectedRole"
+                    [class.bg-gray-300]="!selectedRole" [class.text-gray-500]="!selectedRole">
+                    <i class="mr-2 fas fa-sign-in-alt"></i>
+                    <span class="hidden sm:inline">Ingresar como </span>{{ selectedRole ?
+                    getRoleDisplayName(selectedRole) : 'Seleccionar Rol' }}
+               </button>
+               <button (click)="logout()"
+                    class="px-4 py-3 text-sm font-semibold text-gray-700 transition-all duration-300 transform border-2 border-gray-300 sm:px-6 sm:py-4 sm:text-base lg:text-lg rounded-xl dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105">
+                    <i class="mr-2 fas fa-sign-out-alt"></i>
+                    Cerrar Sesión
+               </button>
+          </div>
+
+          <div
+               class="p-3 mt-6 text-center border sm:p-4 lg:p-6 sm:mt-8 bg-sky-50 dark:bg-gray-800/50 rounded-2xl border-sky-200 dark:border-gray-700">
+               <div class="flex items-center justify-center mb-2">
+                    <i class="mr-2 fas fa-info-circle text-sky-600 dark:text-sky-400"></i>
+                    <span class="text-xs font-medium sm:text-sm text-sky-700 dark:text-sky-300">Información</span>
+               </div>
+               <p class="text-xs leading-relaxed text-gray-600 sm:text-sm dark:text-gray-400">
+                    Puedes cambiar de rol en cualquier momento desde el menú de usuario en la esquina superior derecha.
+                    <br class="hidden sm:block">
+                    Cada rol te dará acceso a diferentes funcionalidades del sistema según tus permisos.
+               </p>
+          </div>
+     </div>
+</div>

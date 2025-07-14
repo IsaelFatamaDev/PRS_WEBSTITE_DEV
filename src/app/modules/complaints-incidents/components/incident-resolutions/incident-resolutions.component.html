@@ -1,0 +1,40 @@
+<div class="container mx-auto p-6 bg-gray-50 min-h-screen">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Gestión de Resoluciones de Incidencia</h1>
+    <button (click)="openResolutionForm()" class="inline-flex items-center justify-center px-5 py-2 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-150 ease-in-out">
+      <svg class="w-5 h-5 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      Nueva Resolución
+    </button>
+  </div>
+
+  <!-- Table Section -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID Incidencia</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Costo Total</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Resuelto Por</th>
+          <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let resolution of resolutions" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{resolution.incidentId}}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{(resolution.resolutionDate && resolution.resolutionDate > 0) ? (resolution.resolutionDate | date:'short') : '-'}}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{resolution.resolutionType}}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{{resolution.totalCost | currency:'S/ '}}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{resolution.resolvedByUserId}}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+            <button (click)="openResolutionForm(resolution)" class="text-indigo-600 hover:text-indigo-800 font-semibold">Editar</button>
+            <button (click)="deleteResolution(resolution.id!)" class="text-red-600 hover:text-red-800 font-semibold">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

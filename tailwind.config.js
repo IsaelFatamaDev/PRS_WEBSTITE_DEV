@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    "./src/**/*.{html,ts}",
+    "./src/**/*.{html,ts,css,scss,js,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {
@@ -46,4 +46,8 @@ module.exports = {
     },
   },
   plugins: [],
+  // Configuración específica para Tailwind CSS v4
+  experimental: {
+    optimizeUniversalDefaults: true
+  }
 }

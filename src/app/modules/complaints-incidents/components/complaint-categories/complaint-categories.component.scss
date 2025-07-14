@@ -1,0 +1,70 @@
+:host {
+  display: block;
+}
+
+.container {
+  max-width: 1200px;
+}
+
+// Form styles
+input, select, textarea {
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+}
+
+// Table styles
+table {
+  th {
+    background-color: #f9fafb;
+  }
+
+  tr {
+    &:hover {
+      background-color: #f9fafb;
+    }
+  }
+}
+
+// Status badge styles
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+
+  &.active {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  &.inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+// Button styles
+button {
+  transition: all 0.2s ease-in-out;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+} 

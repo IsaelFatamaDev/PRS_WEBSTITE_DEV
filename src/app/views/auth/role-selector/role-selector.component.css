@@ -1,0 +1,93 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.role-card:nth-child(1) {
+  animation: slideInFromLeft 0.6s ease-out;
+}
+
+.role-card:nth-child(2) {
+  animation: slideInFromRight 0.6s ease-out;
+}
+
+.role-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.role-card.selected {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(147, 197, 253, 0.1)
+  );
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+button:disabled {
+  animation: none !important;
+  transform: none !important;
+}
+
+button:not(:disabled):hover {
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.animated-bg {
+  background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #bae6fd, #7dd3fc);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .animated-bg {
+    background: linear-gradient(-45deg, #1f2937, #374151, #4b5563, #6b7280);
+  }
+}
+
+@media (max-width: 768px) {
+  .role-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+}

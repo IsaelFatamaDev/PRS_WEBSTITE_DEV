@@ -1,0 +1,183 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <nav class="text-sm text-gray-500 mb-4">
+      <span>Dashboard</span>
+      <span class="mx-2">/</span>
+      <span>Horarios de Distribución</span>
+      <span class="mx-2">/</span>
+      <span class="text-gray-900">{{ isEditMode ? 'Editar' : 'Nueva' }} Horario</span>
+    </nav>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-gray-900">{{ isEditMode ? 'Editar' : 'Nueva' }} Horario</h1>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="p-6">
+      <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Organización -->
+        <div>
+          <label for="organizationId" class="block text-sm font-medium text-gray-700 mb-2">
+            Organización <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="organizationId"
+            formControlName="organizationId"
+            required
+            class="block w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm focus:outline-none"
+            [class.border-red-300]="isFieldInvalid('organizationId')"
+            [class.focus:border-red-500]="isFieldInvalid('organizationId')"
+            [class.focus:ring-red-500]="isFieldInvalid('organizationId')">
+            <option value="">Seleccionar organización</option>
+            <option *ngFor="let o of organizations" [value]="o.organizationId">
+              {{ o.organizationName }} ({{ o.organizationCode }})
+            </option>
+          </select>
+          <p *ngIf="getFieldError('organizationId')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('organizationId') }}
+          </p>
+        </div>
+
+        <!-- Zona -->
+        <div>
+          <label for="zoneId" class="block text-sm font-medium text-gray-700 mb-2">
+            Zona <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="zoneId"
+            formControlName="zoneId"
+            required
+            class="block w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm focus:outline-none"
+            [class.border-red-300]="isFieldInvalid('zoneId')"
+            [class.focus:border-red-500]="isFieldInvalid('zoneId')"
+            [class.focus:ring-red-500]="isFieldInvalid('zoneId')">
+            <option value="">Seleccionar zona</option>
+            <option *ngFor="let z of zones" [value]="z.zoneId">
+              {{ z.zoneName }} ({{ z.zoneCode }})
+            </option>
+          </select>
+          <p *ngIf="getFieldError('zoneId')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('zoneId') }}
+          </p>
+        </div>
+
+        <!-- Nombre del Horario -->
+        <div>
+          <label for="scheduleName" class="block text-sm font-medium text-gray-700 mb-2">
+            Nombre del Horario <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="scheduleName"
+            type="text"
+            formControlName="scheduleName"
+            required
+            autocomplete="off"
+            placeholder="Ej: Horario Zona Central"
+            class="block w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm focus:outline-none"
+            [class.border-red-300]="isFieldInvalid('scheduleName')"
+            [class.focus:border-red-500]="isFieldInvalid('scheduleName')"
+            [class.focus:ring-red-500]="isFieldInvalid('scheduleName')" />
+          <p *ngIf="getFieldError('scheduleName')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('scheduleName') }}
+          </p>
+        </div>
+
+        <!-- Días de la semana -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Días de la semana <span class="text-red-500">*</span>
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <label *ngFor="let day of ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo']" class="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                [value]="day"
+                (change)="onCheckboxChange($event)"
+                [checked]="isDayChecked(day)"
+                class="form-checkbox text-blue-600 rounded" />
+              <span class="text-sm">{{ day }}</span>
+            </label>
+          </div>
+          <p *ngIf="getFieldError('daysOfWeek')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('daysOfWeek') }}
+          </p>
+        </div>
+
+        <!-- Horario de Inicio y Fin -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div>
+    <label for="startTime" class="block text-sm font-medium text-gray-700 mb-2">
+      Hora de Inicio <span class="text-red-500">*</span>
+    </label>
+    <input
+      id="startTime"
+      type="time"
+      formControlName="startTime"
+      required
+      class="block w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm focus:outline-none"
+      [class.border-red-300]="isFieldInvalid('startTime')"
+      [class.focus:border-red-500]="isFieldInvalid('startTime')"
+      [class.focus:ring-red-500]="isFieldInvalid('startTime')" />
+    <p *ngIf="getFieldError('startTime')" class="mt-1 text-sm text-red-600">
+      {{ getFieldError('startTime') }}
+    </p>
+  </div>
+
+  <div>
+    <label for="endTime" class="block text-sm font-medium text-gray-700 mb-2">
+      Hora de Fin <span class="text-red-500">*</span>
+    </label>
+    <input
+      id="endTime"
+      type="time"
+      formControlName="endTime"
+      required
+      class="block w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm focus:outline-none"
+      [class.border-red-300]="isFieldInvalid('endTime')"
+      [class.focus:border-red-500]="isFieldInvalid('endTime')"
+      [class.focus:ring-red-500]="isFieldInvalid('endTime')" />
+    <p *ngIf="getFieldError('endTime')" class="mt-1 text-sm text-red-600">
+      {{ getFieldError('endTime') }}
+    </p>
+
+    <!-- ⚠️ Mensaje adicional si hora de fin es menor o igual a hora de inicio -->
+    <p
+      *ngIf="scheduleForm.errors?.['timeRangeInvalid'] &&
+             scheduleForm.get('endTime')?.touched"
+      class="mt-1 text-sm text-red-600"
+    >
+      La hora de fin debe ser posterior a la hora de inicio.
+    </p>
+  </div>
+</div>
+
+        <!-- Botones -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+          <button type="button" (click)="cancel()"
+            class="inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Cancelar
+          </button>
+          <button type="submit"
+            [disabled]="loading || scheduleForm.invalid"
+            class="inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg *ngIf="loading" class="animate-spin -ml-1 mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <svg *ngIf="!loading" class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

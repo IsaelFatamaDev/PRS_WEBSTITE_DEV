@@ -1,0 +1,171 @@
+<div class="container mx-auto px-4 py-8" *ngIf="incident">
+  <!-- Header -->
+  <div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Detalle del Incidente</h1>
+        <p class="text-sm text-gray-500 mt-1">Información completa del incidente de calidad</p>
+      </div>
+      <div class="flex space-x-3">
+      
+        <button (click)="goBack()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-all duration-200">
+          <i class="fas fa-arrow-left"></i>
+          Volver
+        </button>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" *ngIf="incident.testingPointId">
+      <div class="flex items-center gap-2 text-indigo-600 mb-4">
+        <i class="fas fa-flask"></i>
+        <h2 class="text-lg font-semibold text-gray-800">Punto de Prueba</h2>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Punto de prueba</label>
+        <p class="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+          <i class="fas fa-hashtag text-gray-400"></i>
+          {{getTestingPointName(incident.testingPointId)}}
+        </p>
+      </div>
+    </div>
+    <br>
+    <!-- Información Principal -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Columna Izquierda -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-indigo-600 mb-2">
+            <i class="fas fa-info-circle"></i>
+            <h2 class="text-lg font-semibold text-gray-800">Información Básica</h2>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Código</label>
+              <p class="text-sm font-medium text-gray-900">{{incident.incidentCode}}</p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+              <p class="text-sm font-medium text-gray-900">{{incident.incidentType}}</p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Severidad</label>
+              <span [ngClass]="{
+                'px-2 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1': true,
+                'bg-red-100 text-red-800': incident.severity === 'CRITICAL',
+                'bg-orange-100 text-orange-800': incident.severity === 'HIGH',
+                'bg-yellow-100 text-yellow-800': incident.severity === 'MEDIUM',
+                'bg-green-100 text-green-800': incident.severity === 'LOW'
+              }">
+                <i [ngClass]="{
+                  'fas fa-exclamation-triangle': incident.severity === 'CRITICAL',
+                  'fas fa-exclamation-circle': incident.severity === 'HIGH',
+                  'fas fa-exclamation': incident.severity === 'MEDIUM',
+                  'fas fa-check-circle': incident.severity === 'LOW'
+                }"></i>
+                {{incident.severity}}
+              </span>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Estado</label>
+              <span [ngClass]="{
+                'px-2 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1': true,
+                'bg-green-100 text-green-800': incident.resolved,
+                'bg-red-100 text-red-800': !incident.resolved
+              }">
+                <i [ngClass]="{
+                  'fas fa-check-circle': incident.resolved,
+                  'fas fa-clock': !incident.resolved
+                }"></i>
+                {{incident.resolved ? 'Resuelto' : 'Pendiente'}}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-indigo-600 mb-2">
+            <i class="fas fa-calendar-alt"></i>
+            <h2 class="text-lg font-semibold text-gray-800">Fechas y Responsables</h2>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Detección</label>
+              <p class="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                <i class="far fa-calendar-alt text-gray-400"></i>
+                {{incident.detectionDate | date:'dd/MM/yyyy HH:mm'}}
+              </p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Resolución</label>
+              <p class="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                <i class="far fa-calendar-alt text-gray-400"></i>
+                {{incident.resolutionDate | date:'dd/MM/yyyy HH:mm'}}
+              </p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Reportado por</label>
+              <p class="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                <i class="far fa-user text-gray-400"></i>
+                {{incident.reportedByUserId}}
+              </p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Resuelto por</label>
+              <p class="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                <i class="far fa-user text-gray-400"></i>
+                {{incident.resolvedByUserId}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descripción y Acciones -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <div class="flex items-center gap-2 text-indigo-600 mb-4">
+        <i class="fas fa-clipboard-list"></i>
+        <h2 class="text-lg font-semibold text-gray-800">Descripción y Acciones</h2>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-2">Descripción</label>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-sm text-gray-900">{{incident.description}}</p>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-2">Zonas Afectadas</label>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let zone of incident.affectedZones" 
+                  class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium flex items-center gap-1">
+              <i class="fas fa-map-marker-alt"></i>
+              {{zone}}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-2">Acciones Inmediatas</label>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-sm text-gray-900">{{incident.immediateActions}}</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-2">Acciones Correctivas</label>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-sm text-gray-900">{{incident.correctiveActions}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+   
+   
+  </div>
+</div>

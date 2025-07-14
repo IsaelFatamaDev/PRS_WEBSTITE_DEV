@@ -1,22 +1,43 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { UserRole } from '../../models/auth.model';
+import { RolesUsers } from '../../models/user.model';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  
-  if (authService.isLoggedIn() === false) {
-    router.navigate(['/login']);
+
+  if (!authService.isAuthenticated()) {
+    router.navigate(['/auth/login']);
     return false;
   }
-  
-  const requiredRoles = route.data?.['roles'] as UserRole[]; 
-  if (requiredRoles && !authService.hasRole(requiredRoles[0])) { 
-    router.navigate(['/unauthorized']);
+
+  if (authService.needsRoleSelection()) {
+    router.navigate(['/role-selector']);
     return false;
   }
-  
+
+  const requiredRoles = route.data?.['roles'] as RolesUsers[];
+  if (requiredRoles && requiredRoles.length > 0) {
+    const activeRole = authService.getActiveRole();
+
+    if (!activeRole || !requiredRoles.includes(activeRole)) {
+      if (activeRole) {
+        if (activeRole === RolesUsers.SUPER_ADMIN) {
+          router.navigate(['/super-admin/dashboard']);
+        } else if (activeRole === RolesUsers.ADMIN) {
+          router.navigate(['/admin/dashboard']);
+        } else if (activeRole === RolesUsers.CLIENT) {
+          router.navigate(['/client/dashboard']);
+        } else {
+          router.navigate(['/unauthorized']);
+        }
+      } else {
+        router.navigate(['/unauthorized']);
+      }
+      return false;
+    }
+  }
+
   return true;
 };

@@ -1,0 +1,48 @@
+<div class="container mx-auto p-6 bg-gray-50 min-h-screen">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Gestión de Respuestas de Reclamos</h1>
+    <button (click)="openResponseModal()" class="inline-flex items-center justify-center px-5 py-2 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-150 ease-in-out">
+      <svg class="w-5 h-5 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      Nueva Respuesta
+    </button>
+  </div>
+
+  <!-- Table Section -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <h3 class="text-xl font-bold text-gray-800 p-6 border-b">Lista de Respuestas</h3>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Reclamo</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Respuesta</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Es Solución</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Calificación</th>
+          <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let response of responses" class="hover:bg-gray-50 transition-colors duration-150">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{getComplaintSubject(response.complaintId)}}</td>
+          <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{{response.message}}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{response.responseDate | date}}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span [class]="'px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' + 
+                         (response.isSolution ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')">
+              {{response.isSolution ? 'Sí' : 'No'}}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+            {{response.satisfactionRating ? response.satisfactionRating + '/5' : 'N/A'}}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+            <button (click)="editResponse(response)" class="text-indigo-600 hover:text-indigo-800 font-semibold transition-colors duration-150">Editar</button>
+            <button (click)="deleteResponse(response.id!)" class="text-red-600 hover:text-red-800 font-semibold transition-colors duration-150">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> 

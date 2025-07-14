@@ -1,0 +1,218 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">
+          {{isEditMode ? 'Editar' : 'Crear'}} Incidente
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">Complete la información del incidente de calidad</p>
+      </div>
+      <button (click)="goBack()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-all duration-200">
+        <i class="fas fa-arrow-left"></i>
+        Volver
+      </button>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <!-- Información Básica y Fechas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Columna Izquierda -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-indigo-600 mb-2">
+            <i class="fas fa-info-circle"></i>
+            <h2 class="text-lg font-semibold text-gray-800">Información Básica</h2>
+          </div>
+
+          <div>
+            <label for="incidentCode" class="block text-xs font-medium text-gray-500 mb-1">Código del Incidente</label>
+            <div class="relative">
+              <input type="text" id="incidentCode" formControlName="incidentCode"
+                class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                placeholder="Ingrese el código">
+              <div *ngIf="isFieldInvalid('incidentCode')" class="mt-1 text-xs text-red-600">
+                {{getFieldError('incidentCode')}}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="incidentType" class="block text-xs font-medium text-gray-500 mb-1">Tipo de Incidente</label>
+            <div class="relative">
+              <select id="incidentType" formControlName="incidentType"
+                class="block w-full pl-3 pr-10 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none">
+                <option value="">Seleccione un tipo</option>
+                <option value="LOW_CHLORINE">Cloro Bajo</option>
+                <option value="HIGH_TURBIDITY">Turbidez Alta</option>
+                <option value="CONTAMINATION">Contaminación</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+              </div>
+              <div *ngIf="isFieldInvalid('incidentType')" class="mt-1 text-xs text-red-600">
+                {{getFieldError('incidentType')}}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="testingPointId" class="block text-xs font-medium text-gray-500 mb-1">Punto de Análisis</label>
+            <select id="testingPointId" formControlName="testingPointId"
+              class="block w-full pl-3 pr-10 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none">
+              <option value="">Seleccione un punto de análisis</option>
+              <option *ngFor="let point of testingPoints" [value]="point.id">
+                {{ point.pointName }}
+              </option>
+            </select>
+            <div *ngIf="isFieldInvalid('testingPointId')" class="mt-1 text-xs text-red-600">
+              {{getFieldError('testingPointId')}}
+            </div>
+          </div>
+
+          <div>
+            <label for="severity" class="block text-xs font-medium text-gray-500 mb-1">Severidad</label>
+            <div class="relative">
+              <select id="severity" formControlName="severity"
+                class="block w-full pl-3 pr-10 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none">
+                <option value="">Seleccione severidad</option>
+                <option value="LOW">Baja</option>
+                <option value="MEDIUM">Media</option>
+                <option value="HIGH">Alta</option>
+                <option value="CRITICAL">Crítica</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+              </div>
+              <div *ngIf="isFieldInvalid('severity')" class="mt-1 text-xs text-red-600">
+                {{getFieldError('severity')}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-indigo-600 mb-2">
+            <i class="fas fa-calendar-alt"></i>
+            <h2 class="text-lg font-semibold text-gray-800">Fechas y Estado</h2>
+          </div>
+
+          <div>
+            <label for="detectionDate" class="block text-xs font-medium text-gray-500 mb-1">Fecha de Detección</label>
+            <div class="relative">
+              <input type="datetime-local" id="detectionDate" formControlName="detectionDate"
+                class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+              <div *ngIf="isFieldInvalid('detectionDate')" class="mt-1 text-xs text-red-600">
+                {{getFieldError('detectionDate')}}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="resolutionDate" class="block text-xs font-medium text-gray-500 mb-1">Fecha de Resolución</label>
+            <div class="relative">
+              <input type="datetime-local" id="resolutionDate" formControlName="resolutionDate"
+                class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+              <div *ngIf="isFieldInvalid('resolutionDate')" class="mt-1 text-xs text-red-600">
+                {{getFieldError('resolutionDate')}}
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" formControlName="resolved"
+                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-all duration-200">
+              <span class="text-sm text-gray-700">Marcar como resuelto</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción y Acciones -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-indigo-600 mb-2">
+          <i class="fas fa-clipboard-list"></i>
+          <h2 class="text-lg font-semibold text-gray-800">Descripción y Acciones</h2>
+        </div>
+
+        <div>
+          <label for="description" class="block text-xs font-medium text-gray-500 mb-1">Descripción</label>
+          <textarea id="description" formControlName="description" rows="3"
+            class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="Ingrese la descripción del incidente"></textarea>
+          <div *ngIf="isFieldInvalid('description')" class="mt-1 text-xs text-red-600">
+            {{getFieldError('description')}}
+          </div>
+        </div>
+
+        <div>
+          <label for="affectedZones" class="block text-xs font-medium text-gray-500 mb-1">Zonas Afectadas</label>
+          <input type="text" id="affectedZones" formControlName="affectedZones"
+            class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="Ingrese zonas separadas por comas">
+          <div *ngIf="isFieldInvalid('affectedZones')" class="mt-1 text-xs text-red-600">
+            {{getFieldError('affectedZones')}}
+          </div>
+        </div>
+
+        <div>
+          <label for="immediateActions" class="block text-xs font-medium text-gray-500 mb-1">Acciones Inmediatas</label>
+          <textarea id="immediateActions" formControlName="immediateActions" rows="3"
+            class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="Ingrese las acciones inmediatas tomadas"></textarea>
+          <div *ngIf="isFieldInvalid('immediateActions')" class="mt-1 text-xs text-red-600">
+            {{getFieldError('immediateActions')}}
+          </div>
+        </div>
+
+        <div>
+          <label for="correctiveActions" class="block text-xs font-medium text-gray-500 mb-1">Acciones Correctivas</label>
+          <textarea id="correctiveActions" formControlName="correctiveActions" rows="3"
+            class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="Ingrese las acciones correctivas planificadas"></textarea>
+          <div *ngIf="isFieldInvalid('correctiveActions')" class="mt-1 text-xs text-red-600">
+            {{getFieldError('correctiveActions')}}
+          </div>
+        </div>
+
+        <!-- Usuario que reportó -->
+        <div>
+          <label for="reportedByUserId" class="block text-xs font-medium text-gray-500 mb-1">Usuario que reportó</label>
+          <input type="text" id="reportedByUserId" formControlName="reportedByUserId"
+            class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="ID o nombre del usuario">
+          <div *ngIf="isFieldInvalid('reportedByUserId')" class="mt-1 text-xs text-red-600">
+            {{getFieldError('reportedByUserId')}}
+          </div>
+        </div>
+
+        <!-- Usuario que resolvió -->
+        <div>
+          <label for="resolvedByUserId" class="block text-xs font-medium text-gray-500 mb-1">Usuario que resolvió</label>
+          <input type="text" id="resolvedByUserId" formControlName="resolvedByUserId"
+            class="block w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="ID o nombre del usuario">
+          <div *ngIf="isFieldInvalid('resolvedByUserId')" class="mt-1 text-xs text-red-600">
+            {{getFieldError('resolvedByUserId')}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="mt-8 flex justify-end space-x-3">
+        <button type="button" (click)="goBack()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200 flex items-center gap-2">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="incidentForm.invalid"
+          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 flex items-center gap-2">
+          <i class="fas" [ngClass]="isEditMode ? 'fa-save' : 'fa-plus'"></i>
+          {{isEditMode ? 'Actualizar' : 'Crear'}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

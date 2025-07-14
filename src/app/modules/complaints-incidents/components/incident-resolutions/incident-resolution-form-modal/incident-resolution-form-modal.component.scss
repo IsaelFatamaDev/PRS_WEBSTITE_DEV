@@ -1,0 +1,105 @@
+/* styles for incident-resolution-form-modal.component */
+
+:host {
+  display: block;
+  background-color: #f7f9fc;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* General styles for the modal */
+.incident-resolution-form-container {
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* Custom styles for the toolbar */
+.custom-toolbar {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+}
+
+.close-button {
+  color: white;
+}
+
+/* Styles for the form content */
+.form-content {
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+
+.form-card {
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  mat-card-header {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  mat-card-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Styles for the materials section */
+.material-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.add-material-button {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Styles for checkboxes */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+/* Styles for form actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+} 

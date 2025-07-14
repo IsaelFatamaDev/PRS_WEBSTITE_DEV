@@ -1,0 +1,118 @@
+<div class="bg-white rounded-xl shadow-xl overflow-y-auto max-h-[90vh]">
+  <div class="p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-4 border-b">
+      {{ isEditing ? 'Editar Resolución de Incidencia' : 'Nueva Resolución de Incidencia' }}
+    </h2>
+
+    <form [formGroup]="resolutionForm" (ngSubmit)="onSubmit()" class="space-y-8">
+
+      <!-- Main Details -->
+      <div class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Detalles Principales</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+          <div>
+            <label for="incidentId" class="block text-sm font-medium text-gray-700 mb-1">ID de Incidencia</label>
+            <input id="incidentId" type="text" formControlName="incidentId" placeholder="Ej: 60f5e4d2b32a1c3e5a7b8c9d"
+                   class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+          <div>
+            <label for="resolvedByUserId" class="block text-sm font-medium text-gray-700 mb-1">Resuelto por (ID Usuario)</label>
+            <input id="resolvedByUserId" type="text" formControlName="resolvedByUserId" placeholder="Ej: 60f5e4d2b32a1c3e5a7b8c9d"
+                   class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+          <div>
+            <label for="resolutionDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Resolución</label>
+            <input id="resolutionDate" type="date" formControlName="resolutionDate"
+                   class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+          <div>
+            <label for="resolutionType" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Resolución</label>
+            <input id="resolutionType" type="text" formControlName="resolutionType" placeholder="Ej: Reparación, Reemplazo, Mantenimiento"
+                   class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions and Notes -->
+      <div class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Acciones y Notas</h3>
+        <div class="space-y-6">
+          <div>
+            <label for="actionsTaken" class="block text-sm font-medium text-gray-700 mb-1">Acciones Realizadas</label>
+            <textarea id="actionsTaken" formControlName="actionsTaken" rows="4" placeholder="Detalle todas las acciones realizadas para resolver la incidencia, incluyendo procedimientos, herramientas utilizadas y personal involucrado..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+          </div>
+          <div>
+            <label for="resolutionNotes" class="block text-sm font-medium text-gray-700 mb-1">Notas Adicionales</label>
+            <textarea id="resolutionNotes" formControlName="resolutionNotes" rows="3" placeholder="Observaciones adicionales, recomendaciones para prevenir incidencias similares o información complementaria..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materials Used -->
+      <div class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Materiales Utilizados</h3>
+        <div formArrayName="materialsUsed" class="space-y-4">
+          <div *ngFor="let material of materialsUsed.controls; let i=index" [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-4 gap-x-6 items-end p-4 border rounded-lg bg-gray-50">
+            <div class="md:col-span-1">
+              <label [for]="'productId' + i" class="block text-sm font-medium text-gray-700 mb-1">Producto ID</label>
+              <input [id]="'productId' + i" type="text" formControlName="productId" placeholder="Ej: 60f5e4d2b32a1c3e5a7b8c9d" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+            <div class="md:col-span-1">
+              <label [for]="'quantity' + i" class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+              <input [id]="'quantity' + i" type="number" formControlName="quantity" placeholder="Ej: 5" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+            <div class="md:col-span-1">
+              <label [for]="'unit' + i" class="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
+              <input [id]="'unit' + i" type="text" formControlName="unit" placeholder="Ej: metros, unidades, kg" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+            <div class="md:col-span-1 flex justify-end">
+              <button type="button" (click)="removeMaterial(i)" class="px-3 py-2 border border-transparent rounded-lg text-sm font-semibold text-red-600 hover:bg-red-100 focus:outline-none">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+        <button type="button" (click)="addMaterial()" class="inline-flex items-center px-4 py-2 border border-dashed border-gray-400 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none">
+          Añadir Material
+        </button>
+      </div>
+
+      <!-- Costs and Follow-up -->
+      <div class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Costos y Seguimiento</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+          <div>
+            <label for="laborHours" class="block text-sm font-medium text-gray-700 mb-1">Horas de Trabajo</label>
+            <input id="laborHours" type="number" formControlName="laborHours" placeholder="Ej: 4.5" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+          <div>
+            <label for="totalCost" class="block text-sm font-medium text-gray-700 mb-1">Costo Total (S/.)</label>
+            <input id="totalCost" type="number" formControlName="totalCost" placeholder="Ej: 350.75" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+        </div>
+        <div class="flex items-center space-x-8 pt-2">
+            <div class="flex items-center">
+                <input id="qualityCheck" type="checkbox" formControlName="qualityCheck" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                <label for="qualityCheck" class="ml-3 block text-sm font-medium text-gray-800">Verificación de Calidad</label>
+            </div>
+            <div class="flex items-center">
+                <input id="followUpRequired" type="checkbox" formControlName="followUpRequired" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                <label for="followUpRequired" class="ml-3 block text-sm font-medium text-gray-800">Requiere Seguimiento</label>
+            </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Modal Actions -->
+  <div class="bg-gray-50 px-8 py-4 flex justify-end items-center space-x-4 sticky bottom-0">
+    <button type="button" (click)="onCancel()"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all">
+      Cancelar
+    </button>
+    <button type="button" (click)="onSubmit()" [disabled]="!resolutionForm.valid"
+            class="inline-flex justify-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all">
+      {{ isEditing ? 'Actualizar' : 'Crear' }}
+    </button>
+  </div>
+</div>

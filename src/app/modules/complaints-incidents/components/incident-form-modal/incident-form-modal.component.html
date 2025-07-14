@@ -1,0 +1,279 @@
+<div class="bg-white rounded-xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col">
+  <div class="p-4 overflow-y-auto flex-1">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
+      {{ isEditing ? 'Editar Incidencia' : 'Nueva Incidencia' }}
+    </h2>
+
+    <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        <!-- INFORMACION GENERAL column -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">INFORMACIÓN GENERAL</h3>
+          <div class="space-y-6">
+            <!-- Incident Code -->
+            <div>
+              <label for="incident_code" class="block text-sm font-medium text-gray-700 mb-1">Código de Incidencia</label>
+              <input id="incident_code" type="text" formControlName="incidentCode" placeholder="INC-001"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Title -->
+            <div>
+              <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+              <input id="title" type="text" formControlName="title" placeholder="Fuga de agua en tubería principal"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+              <textarea id="description" formControlName="description" rows="4" placeholder="Describa la incidencia detallando: ubicación exacta, problema observado, cuándo ocurrió y cualquier otra información relevante..."
+                        class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+            </div>
+
+            <!-- Incident Type -->
+            <div>
+              <label for="incident_type_id" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Incidencia</label>
+              <select id="incident_type_id" formControlName="incidentTypeId" [disabled]="isLoadingTypes"
+                      class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition disabled:bg-gray-100 disabled:cursor-not-allowed">
+                <option value="">Selecciona un tipo de incidencia</option>
+                <option *ngFor="let type of incidentTypes" [value]="type.id">
+                  {{ type.typeName }}
+                </option>
+              </select>
+              <div *ngIf="isLoadingTypes" class="text-sm text-gray-500 mt-1 flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Cargando tipos de incidencias...
+              </div>
+              <div *ngIf="!isLoadingTypes && incidentTypes.length === 0" class="text-sm text-red-500 mt-1">
+                No se encontraron tipos de incidencias
+              </div>
+              <div *ngIf="getSelectedIncidentType()" class="text-sm text-gray-600 mt-2 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
+                <div class="font-semibold text-blue-800">{{ getSelectedIncidentType()?.typeName }}</div>
+                <div class="mt-1">{{ getSelectedIncidentType()?.description }}</div>
+                <div class="mt-1 text-xs text-blue-600">
+                  Tiempo estimado: {{ getSelectedIncidentType()?.estimatedResolutionTime }}h | 
+                  Prioridad: {{ getPriorityLabel(getSelectedIncidentType()?.priorityLevel) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Incident Category -->
+            <div>
+              <label for="incident_category" class="block text-sm font-medium text-gray-700 mb-1">Categoría de Incidencia</label>
+              <select id="incident_category" formControlName="incidentCategory"
+                      class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option *ngFor="let category of incidentCategories" [value]="category">{{category}}</option>
+              </select>
+            </div>
+
+            <!-- Zone ID -->
+            <div>
+              <label for="zone_id" class="block text-sm font-medium text-gray-700 mb-1">Zona Principal Afectada</label>
+              <input id="zone_id" type="text" formControlName="zoneId" placeholder="Zona_Sur - Norte"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Incident Date -->
+            <div>
+              <label for="incident_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Incidencia</label>
+              <input id="incident_date" type="date" formControlName="incidentDate"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Severity -->
+            <div>
+              <label for="severity" class="block text-sm font-medium text-gray-700 mb-1">Severidad</label>
+              <select id="severity" formControlName="severity"
+                      class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option *ngFor="let sev of esSeverity" [value]="sev.value">{{sev.label}}</option>
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div>
+              <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <select id="status" formControlName="status"
+                      class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option value="REPORTED">Reportado</option>
+                <option value="IN_PROGRESS">En Progreso</option>
+                <option value="RESOLVED">Resuelto</option>
+                <option value="CLOSED">Cerrado</option>
+              </select>
+            </div>
+
+            <!-- Resolved Checkbox -->
+            <div class="flex items-center">
+              <input id="resolved" type="checkbox" formControlName="resolved"
+                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+              <label for="resolved" class="ml-2 block text-sm text-gray-900">
+                Incidencia resuelta
+              </label>
+            </div>
+
+            <!-- Organization ID -->
+            <div>
+              <label for="organization_id" class="block text-sm font-medium text-gray-700 mb-1">Organización(ID - UBICACIÓN)</label>
+              <input id="organization_id" type="text" formControlName="organizationId" placeholder=""
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+          </div>
+        </div>
+
+        <!-- DETALLES ADICIONALES column -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">DETALLES ADICIONALES</h3>
+          <div class="space-y-6">
+            <!-- Affected Boxes Count -->
+            <div>
+              <label for="affected_boxes_count" class="block text-sm font-medium text-gray-700 mb-1">Cantidad de Cajas Afectadas</label>
+              <input id="affected_boxes_count" type="number" formControlName="affectedBoxesCount" min="0"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Reported By User ID -->
+            <div>
+              <label for="reported_by_user_id" class="block text-sm font-medium text-gray-700 mb-1">Reportado Por (UserId - Nombre)</label>
+              <input id="reported_by_user_id" type="text" formControlName="reportedByUserId" placeholder="Isael o ID"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Assigned To User ID -->
+            <div>
+              <label for="assigned_to_user_id" class="block text-sm font-medium text-gray-700 mb-1">Asignado A (UserId - Nombre)</label>
+              <input id="assigned_to_user_id" type="text" formControlName="assignedToUserId" placeholder="Isael o Id"
+                     class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Section for Incident Resolution Details -->
+      <div class="border-t pt-6 mt-6">
+        <button type="button" (click)="toggleResolutionDetails()"
+                class="flex items-center justify-between w-full px-4 py-3 bg-gray-100 rounded-lg text-left text-lg font-semibold text-gray-800 hover:bg-gray-200 transition-all">
+          <span>Detalles de Resolución</span>
+          <svg class="h-5 w-5 transform transition-transform" [class.rotate-90]="showResolutionDetails" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+
+        <div *ngIf="showResolutionDetails" class="mt-6 p-6 border border-gray-200 rounded-lg bg-gray-50">
+          <form [formGroup]="resolutionForm" class="space-y-8">
+
+            <!-- Main Details -->
+            <div class="space-y-6">
+              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Detalles Principales</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div>
+                  <label for="incidentIdResolution" class="block text-sm font-medium text-gray-700 mb-1">ID de Incidencia (Automático)</label>
+                  <input id="incidentIdResolution" type="text" formControlName="incidentId" readonly
+                         class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm cursor-not-allowed">
+                </div>
+                <div>
+                  <label for="resolvedByUserIdResolution" class="block text-sm font-medium text-gray-700 mb-1">Resuelto por (ID Usuario)</label>
+                  <input id="resolvedByUserIdResolution" type="text" formControlName="resolvedByUserId"
+                         class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div>
+                  <label for="resolutionDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Resolución</label>
+                  <input id="resolutionDate" type="date" formControlName="resolutionDate"
+                         class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div>
+                  <label for="resolutionType" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Resolución</label>
+                  <input id="resolutionType" type="text" formControlName="resolutionType"
+                         class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions and Notes -->
+            <div class="space-y-6">
+              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Acciones y Notas</h3>
+              <div class="space-y-6">
+                <div>
+                  <label for="actionsTaken" class="block text-sm font-medium text-gray-700 mb-1">Acciones Realizadas</label>
+                  <textarea id="actionsTaken" formControlName="actionsTaken" rows="4" placeholder="Detalle las acciones realizadas para resolver la incidencia..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                </div>
+                <div>
+                  <label for="resolutionNotesResolution" class="block text-sm font-medium text-gray-700 mb-1">Notas Adicionales</label>
+                  <textarea id="resolutionNotesResolution" formControlName="resolutionNotes" rows="3" placeholder="Observaciones adicionales, recomendaciones o información complementaria..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Materials Used -->
+            <div class="space-y-6">
+              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Materiales Utilizados</h3>
+              <div formArrayName="materialsUsed" class="space-y-4">
+                <div *ngFor="let material of materialsUsed.controls; let i=index" [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-4 gap-x-6 items-end p-4 border rounded-lg bg-gray-50">
+                  <div class="md:col-span-1">
+                    <label [for]="'productId' + i" class="block text-sm font-medium text-gray-700 mb-1">Producto ID</label>
+                    <input [id]="'productId' + i" type="text" formControlName="productId" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                  </div>
+                  <div class="md:col-span-1">
+                    <label [for]="'quantity' + i" class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                    <input [id]="'quantity' + i" type="number" formControlName="quantity" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                  </div>
+                  <div class="md:col-span-1">
+                    <label [for]="'unit' + i" class="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
+                    <input [id]="'unit' + i" type="text" formControlName="unit" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                  </div>
+                  <div class="md:col-span-1 flex justify-end">
+                    <button type="button" (click)="removeMaterial(i)" class="px-3 py-2 border border-transparent rounded-lg text-sm font-semibold text-red-600 hover:bg-red-100 focus:outline-none">
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" (click)="addMaterial()" class="inline-flex items-center px-4 py-2 border border-dashed border-gray-400 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none">
+                Añadir Material
+              </button>
+            </div>
+
+            <!-- Costs and Follow-up -->
+            <div class="space-y-6">
+              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Costos y Seguimiento</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div>
+                  <label for="laborHours" class="block text-sm font-medium text-gray-700 mb-1">Horas de Trabajo</label>
+                  <input id="laborHours" type="number" formControlName="laborHours" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div>
+                  <label for="totalCost" class="block text-sm font-medium text-gray-700 mb-1">Costo Total (S/.)</label>
+                  <input id="totalCost" type="number" formControlName="totalCost" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+              </div>
+              <div class="flex items-center space-x-8 pt-2">
+                  <div class="flex items-center">
+                      <input id="qualityCheck" type="checkbox" formControlName="qualityCheck" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                      <label for="qualityCheck" class="ml-3 block text-sm font-medium text-gray-800">Verificación de Calidad</label>
+                  </div>
+                  <div class="flex items-center">
+                      <input id="followUpRequired" type="checkbox" formControlName="followUpRequired" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                      <label for="followUpRequired" class="ml-3 block text-sm font-medium text-gray-800">Requiere Seguimiento</label>
+                  </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Modal Actions -->
+  <div class="bg-gray-50 px-4 py-2 flex justify-end items-center space-x-2">
+    <button type="button" (click)="onCancel()"
+            class="p-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all">
+      <mat-icon>cancel</mat-icon>
+    </button>
+    <button type="button" (click)="onButtonClick()" [disabled]="!incidentForm.valid"
+            class="p-2 border border-transparent rounded-full shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all">
+      <mat-icon>save</mat-icon>
+    </button>
+  </div>
+</div>

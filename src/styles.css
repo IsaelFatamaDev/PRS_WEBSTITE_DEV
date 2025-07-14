@@ -23,9 +23,7 @@ body {
   transition-duration: 200ms;
 }
 
-/* Mejores colores para modo oscuro */
 .dark {
-  /* Colores de fondo más suaves y contrastantes */
   --color-bg-primary: rgb(3 7 18); /* gray-950 personalizado */
   --color-bg-secondary: rgb(15 23 42); /* slate-900 */
   --color-bg-tertiary: rgb(30 41 59); /* slate-800 */
@@ -185,3 +183,6 @@ body {
 .animate-soft-pulse {
   animation: softPulse 2s ease-in-out infinite;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

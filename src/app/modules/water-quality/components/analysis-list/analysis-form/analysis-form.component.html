@@ -1,0 +1,246 @@
+<!-- Contenedor principal -->
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+        <a href="/admin/dashboard" class="hover:text-blue-600">Dashboard</a>
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <a href="/admin/analysis" class="hover:text-blue-600">Análisis de Calidad</a>
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="text-gray-900 font-medium">{{ isEditMode ? 'Editar' : 'Nuevo' }} Análisis</span>
+      </nav>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">{{ isEditMode ? 'Editar' : 'Nuevo' }} Análisis de Calidad</h1>
+        <button (click)="goBack()" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <svg class="-ml-1 mr-1.5 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="analysisForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Información General -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-200 to-indigo-300">
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="text-base font-semibold text-gray-900">Información General</h2>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        
+            <!-- Fecha -->
+            <div>
+              <label for="testDate" class="block text-sm font-medium text-gray-700">Fecha</label>
+              <input type="datetime-local" id="testDate" formControlName="testDate"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('testDate')}">
+              <div *ngIf="isFieldInvalid('testDate')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('testDate') }}
+              </div>
+            </div>
+
+            <!-- Tipo de Prueba -->
+            <div>
+              <label for="testType" class="block text-sm font-medium text-gray-700">Tipo de Prueba</label>
+              <select id="testType" formControlName="testType"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('testType')}">
+                <option value="">Seleccione un tipo</option>
+                <option value="RUTINARIO">Rutinario</option>
+                <option value="ESPECIAL">Especial</option>
+                <option value="INCIDENCIA">Incidencia</option>
+              </select>
+              <div *ngIf="isFieldInvalid('testType')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('testType') }}
+              </div>
+            </div>
+
+            <!-- Punto de Análisis -->
+            <div>
+              <label for="testingPointId" class="block text-sm font-medium text-gray-700">Punto de Análisis</label>
+              <select id="testingPointId" formControlName="testingPointId"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('testingPointId')}">
+                <option value="">Seleccione un punto de análisis</option>
+                <option *ngFor="let point of testingPoints" [value]="point.id">
+                  {{ point.pointName }} 
+                </option>
+              </select>
+              <div *ngIf="isFieldInvalid('testingPointId')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('testingPointId') }}
+              </div>
+            </div>
+
+            <!-- Organization ID -->
+            <div>
+              <label for="organizationId" class="block text-sm font-medium text-gray-700">ID de Organización</label>
+              <input type="text" id="organizationId" formControlName="organizationId"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('organizationId')}">
+              <div *ngIf="isFieldInvalid('organizationId')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('organizationId') }}
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div>
+              <label for="status" class="block text-sm font-medium text-gray-700">Estado</label>
+              <select id="status" formControlName="status"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('status')}">
+                <option value="">Seleccione un estado</option>
+                <option value="PENDING">Pendiente</option>
+                <option value="IN_PROGRESS">En Progreso</option>
+                <option value="COMPLETED">Completado</option>
+              </select>
+              <div *ngIf="isFieldInvalid('status')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('status') }}
+              </div>
+            </div>
+  <!-- Condiciones Climáticas -->
+  <div>
+    <label for="weatherConditions" class="block text-sm font-medium text-gray-700">Condiciones Climáticas</label>
+    <input type="text" id="weatherConditions" formControlName="weatherConditions"
+      class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+      [ngClass]="{'border-red-300': isFieldInvalid('weatherConditions')}">
+    <div *ngIf="isFieldInvalid('weatherConditions')" class="mt-1 text-sm text-red-600">
+      {{ getFieldError('weatherConditions') }}
+    </div>
+  </div>
+            <!-- Temperature -->
+            <div>
+              <label for="waterTemperature" class="block text-sm font-medium text-gray-700">Temperatura</label>
+              <input type="text" id="waterTemperature" formControlName="waterTemperature"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('waterTemperature')}">
+              <div *ngIf="isFieldInvalid('waterTemperature')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('waterTemperature') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-green-200 to-emerald-300">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <h2 class="text-base font-semibold text-gray-900">Resultados</h2>
+            </div>
+            <button type="button" (click)="addResult()" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+              <svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Agregar Resultado
+            </button>
+          </div>
+        </div>
+        <div class="p-4">
+          <div formArrayName="results" class="space-y-4">
+            <div *ngFor="let result of resultsArray.controls; let i = index" [formGroupName]="i" class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-900">Resultado {{ i + 1 }}</h3>
+                <button type="button" (click)="removeResult(i)" class="text-red-600 hover:text-red-900">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <!-- Parámetro -->
+                <div>
+                  <label [for]="'parameterCode_' + i" class="block text-sm font-medium text-gray-700">Parámetro</label>
+                  <input type="text" [id]="'parameterCode_' + i" formControlName="parameterCode"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <!-- Valor -->
+                <div>
+                  <label [for]="'measuredValue_' + i" class="block text-sm font-medium text-gray-700">Valor</label>
+                  <input type="number" [id]="'measuredValue_' + i" formControlName="measuredValue" step="0.01"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <!-- Unidad -->
+                <div>
+                  <label [for]="'unit_' + i" class="block text-sm font-medium text-gray-700">Unidad</label>
+                  <input type="text" [id]="'unit_' + i" formControlName="unit"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <!-- Estado -->
+                <div>
+                  <label [for]="'status_' + i" class="block text-sm font-medium text-gray-700">Estado</label>
+                  <select [id]="'status_' + i" formControlName="status"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="ACCEPTABLE">Aceptable</option>
+                    <option value="WARNING">Advertencia</option>
+                    <option value="CRITICAL">Crítico</option>
+                  </select>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="sm:col-span-2">
+                  <label [for]="'observations_' + i" class="block text-sm font-medium text-gray-700">Observaciones</label>
+                  <textarea [id]="'observations_' + i" formControlName="observations" rows="2"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observaciones Generales -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-purple-200 to-pink-300">
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <h2 class="text-base font-semibold text-gray-900">Observaciones Generales</h2>
+          </div>
+        </div>
+        <div class="p-4">
+          <div>
+            <label for="generalObservations" class="block text-sm font-medium text-gray-700">Observaciones</label>
+            <textarea id="generalObservations" formControlName="generalObservations" rows="4"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex justify-end space-x-3">
+        <button type="button" (click)="goBack()"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="!isFormValid() || isSubmitting"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isSubmitting ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

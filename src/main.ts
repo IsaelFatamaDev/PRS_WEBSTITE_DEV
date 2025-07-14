@@ -18,7 +18,6 @@ function initializeTheme() {
 
 initializeTheme();
 
-// Agregar provideAnimations al config
 const enhancedAppConfig = {
   ...appConfig,
   providers: [

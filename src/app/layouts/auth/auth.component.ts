@@ -24,12 +24,10 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkScreenSize();
-    // Recuperar el estado de la sidebar del localStorage
     const savedState = localStorage.getItem('sidebarState');
     if (savedState !== null) {
       this.isSidebarOpen = JSON.parse(savedState);
     } else {
-      // Si no hay estado guardado, inicializar basado en el tamaño de la pantalla
       this.isSidebarOpen = window.innerWidth >= 768;
     }
   }
@@ -40,7 +38,6 @@ export class AuthComponent implements OnInit {
   }
 
   private checkScreenSize(): void {
-    // Auto-close sidebar on mobile screens
     if (window.innerWidth < 768) {
       this.showMobileMenuButton = true;
     } else {

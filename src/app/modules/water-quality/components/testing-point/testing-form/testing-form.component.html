@@ -1,0 +1,218 @@
+<!-- Contenedor principal -->
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+        <a href="/admin/dashboard" class="hover:text-blue-600">Dashboard</a>
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <a href="/admin/testing-points" class="hover:text-blue-600">Puntos de Prueba</a>
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="text-gray-900 font-medium">{{ isEditMode ? 'Editar' : 'Nuevo' }} Punto de Prueba</span>
+      </nav>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">{{ isEditMode ? 'Editar' : 'Nuevo' }} Punto de Prueba</h1>
+        <button (click)="goBack()" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <svg class="-ml-1 mr-1.5 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver
+        </button>
+      </div>
+    </div>
+
+    <!-- Alertas -->
+    <div *ngIf="showAlert" class="mb-4 p-4 rounded-md" [ngClass]="{
+      'bg-green-100 border-green-400': alertType === 'success',
+      'bg-red-100 border-red-400': alertType === 'error',
+      'bg-blue-100 border-blue-400': alertType === 'info'
+    }">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg *ngIf="alertType === 'success'" class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <svg *ngIf="alertType === 'error'" class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <svg *ngIf="alertType === 'info'" class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium" [ngClass]="{
+            'text-green-800': alertType === 'success',
+            'text-red-800': alertType === 'error',
+            'text-blue-800': alertType === 'info'
+          }">
+            {{ alertMessage }}
+          </p>
+        </div>
+        <div class="ml-auto pl-3">
+          <button (click)="dismissAlert()" class="inline-flex rounded-md p-1.5" [ngClass]="{
+            'bg-green-100 text-green-500 hover:bg-green-200': alertType === 'success',
+            'bg-red-100 text-red-500 hover:bg-red-200': alertType === 'error',
+            'bg-blue-100 text-blue-500 hover:bg-blue-200': alertType === 'info'
+          }">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex items-center justify-center p-8 bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div class="text-center">
+        <div class="h-6 w-6 mx-auto rounded-full border-b-2 border-blue-600 animate-spin"></div>
+        <p class="mt-2 text-gray-500 text-sm">Cargando información...</p>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form *ngIf="!loading" [formGroup]="pointForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Información General -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-200 to-indigo-300">
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="text-base font-semibold text-gray-900">Información General</h2>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Nombre del Punto -->
+            <div>
+              <label for="pointName" class="block text-sm font-medium text-gray-700">Nombre del Punto <span class="text-red-500">*</span></label>
+              <input type="text" id="pointName" formControlName="pointName"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('pointName')}"
+                placeholder="Punto de Control Principal">
+              <div *ngIf="isFieldInvalid('pointName')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('pointName') }}
+              </div>
+            </div>
+
+            <!-- Tipo de Punto -->
+            <div>
+              <label for="pointType" class="block text-sm font-medium text-gray-700">Tipo de Punto <span class="text-red-500">*</span></label>
+              <select id="pointType" formControlName="pointType"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('pointType')}">
+                <option value="">Seleccione un tipo</option>
+                <option value="RESERVORIO">Reservorio</option>
+                <option value="RED_DISTRIBUCION">Red de Distribución</option>
+                <option value="DOMICILIO">Domicilio</option>
+              </select>
+              <div *ngIf="isFieldInvalid('pointType')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('pointType') }}
+              </div>
+            </div>
+
+            <!-- ID de Organización -->
+            <div>
+              <label for="organizationId" class="block text-sm font-medium text-gray-700">Organización <span class="text-red-500">*</span></label>
+              <select id="organizationId" formControlName="organizationId"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('organizationId')}">
+                <option value="">Seleccione una organización</option>
+                <option *ngFor="let org of organizations" [value]="org.organizationId">{{ org.organizationName }}</option>
+              </select>
+              <div *ngIf="isFieldInvalid('organizationId')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('organizationId') }}
+              </div>
+            </div>
+
+            <!-- Zona -->
+            <div>
+              <label for="zoneId" class="block text-sm font-medium text-gray-700">Zona <span class="text-red-500">*</span></label>
+              <select id="zoneId" formControlName="zoneId"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('zoneId')}">
+                <option value="">Seleccione una zona</option>
+                <option *ngFor="let zone of zones" [value]="zone.zoneId">{{ zone.zoneName }}</option>
+              </select>
+              <div *ngIf="isFieldInvalid('zoneId')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('zoneId') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ubicación y Coordenadas -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-green-200 to-emerald-300">
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            </svg>
+            <h2 class="text-base font-semibold text-gray-900">Ubicación y Coordenadas</h2>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Descripción de Ubicación -->
+            <div class="sm:col-span-2">
+              <label for="locationDescription" class="block text-sm font-medium text-gray-700">Descripción de Ubicación <span class="text-red-500">*</span></label>
+              <textarea id="locationDescription" formControlName="locationDescription" rows="3"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('locationDescription')}"
+                placeholder="Descripción detallada de la ubicación del punto de prueba"></textarea>
+              <div *ngIf="isFieldInvalid('locationDescription')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('locationDescription') }}
+              </div>
+            </div>
+
+            <!-- Latitud -->
+            <div>
+              <label for="latitude" class="block text-sm font-medium text-gray-700">Latitud <span class="text-red-500">*</span></label>
+              <input type="number" id="latitude" formControlName="latitude" step="0.000001"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('latitude')}"
+                placeholder="-12.345678">
+              <div *ngIf="isFieldInvalid('latitude')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('latitude') }}
+              </div>
+            </div>
+
+            <!-- Longitud -->
+            <div>
+              <label for="longitude" class="block text-sm font-medium text-gray-700">Longitud <span class="text-red-500">*</span></label>
+              <input type="number" id="longitude" formControlName="longitude" step="0.000001"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                [ngClass]="{'border-red-300': isFieldInvalid('longitude')}"
+                placeholder="-78.901234">
+              <div *ngIf="isFieldInvalid('longitude')" class="mt-1 text-sm text-red-600">
+                {{ getFieldError('longitude') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex justify-end space-x-3">
+        <button type="button" (click)="goBack()"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="!isFormValid() || isSubmitting"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isSubmitting ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

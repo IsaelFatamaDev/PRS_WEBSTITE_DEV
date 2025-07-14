@@ -1,15 +1,15 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter, Input, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AnimationService } from '../../../../core/services/animation.service';
-import { UserRole } from '../../../../core/models/auth.model';
+import { RolesUsers } from '../../../../core/models/user.model';
 import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
   providers: [DatePipe]
@@ -31,14 +31,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private datePipe: DatePipe,
     private cdr: ChangeDetectorRef
   ) {
-    // Inicializar el tema desde localStorage (por defecto claro)
     this.initializeTheme();
   }
 
   private initializeTheme(): void {
     const savedTheme = localStorage.getItem('theme');
 
-    // Si no hay tema guardado, establecer por defecto como claro
     if (!savedTheme) {
       this.isDarkMode = false;
       localStorage.setItem('theme', 'light');
@@ -46,7 +44,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     } else {
       this.isDarkMode = savedTheme === 'dark';
 
-      // Aplicar el tema al documento
       if (this.isDarkMode) {
         document.documentElement.classList.add('dark');
       } else {
@@ -68,19 +65,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const userMenuDropdown = document.querySelector('[data-user-menu-dropdown]');
 
     if (this.isUserMenuOpen &&
-        !userMenuButton?.contains(target) &&
-        !userMenuDropdown?.contains(target)) {
+      !userMenuButton?.contains(target) &&
+      !userMenuDropdown?.contains(target)) {
       this.isUserMenuOpen = false;
     }
   }
 
   ngOnInit(): void {
-    // Inicializamos el ancho de la ventana
     this.windowWidth = window.innerWidth;
-    // Iniciar el reloj en tiempo real
     this.startClock();
 
-    // Forzar una actualización después de un pequeño retraso
     setTimeout(() => {
       this.windowWidth = window.innerWidth;
       this.cdr.detectChanges();
@@ -96,7 +90,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   startClock(): void {
     this.timeSubscription = interval(1000).subscribe(() => {
       this.currentTime = new Date();
-      // Limitar las actualizaciones del reloj para no afectar el rendimiento
       this.cdr.markForCheck();
     });
   }
@@ -122,7 +115,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleSidebar() {
     this.toggleSidebarEvent.emit();
-  }  toggleUserMenu() {
+  } toggleUserMenu() {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
@@ -133,65 +126,83 @@ export class HeaderComponent implements OnInit, OnDestroy {
   toggleTheme() {
     this.isDarkMode = !this.isDarkMode;
 
-    // Aplicar cambios inmediatamente al DOM
     const htmlElement = document.documentElement;
 
     if (this.isDarkMode) {
-      // Modo oscuro activado
       htmlElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      // Modo claro activado
       htmlElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
 
-    // Forzar detección de cambios
     this.cdr.detectChanges();
 
-    // Debug info mejorado
     console.log('🌙 Theme toggled:', this.isDarkMode ? 'DARK MODE' : 'LIGHT MODE');
     console.log('🔧 HTML classes:', htmlElement.className);
     console.log('💾 LocalStorage theme:', localStorage.getItem('theme'));
     console.log('🎨 Dark class present:', htmlElement.classList.contains('dark'));
-  }
-  logout(): void {
+  } logout(): void {
     this.closeUserMenu();
-
-    // Mostrar animación de despedida
     this.animationService.showGoodbyeAnimation();
 
-    // Esperar a que termine la animación antes de hacer logout
-    setTimeout(() => {
-      this.authService.logout();
-      this.router.navigate(['/auth/login']);
-    }, 3000); // 3 segundos para la animación
+    this.authService.logout().subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.router.navigate(['/auth/login'], { replaceUrl: true });
+        }, 1000);
+      },
+      error: () => {
+        setTimeout(() => {
+          this.router.navigate(['/auth/login'], { replaceUrl: true });
+        }, 1000);
+      }
+    });
   }
-
   getCurrentUserName(): string {
     const user = this.authService.getCurrentUser();
-    return user?.name || 'Usuario';
+    return user?.fullName || 'Usuario';
   }
 
   getUserInitials(): string {
     const user = this.authService.getCurrentUser();
-    if (user?.name) {
-      return user.name.split(' ')
-        .map(n => n[0])
+    if (user?.fullName) {
+      return user.fullName.split(' ')
+        .map((n: string) => n[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
     }
     return 'U';
   }
-
   getUserRoleDisplay(): string {
     const user = this.authService.getCurrentUser();
+
+    if (!user?.roles || user.roles.length === 0) {
+      return 'Usuario';
+    }
+
+    const activeRole = this.authService.getActiveRole();
+    if (activeRole) {
+      const roleDisplayMap = {
+        [RolesUsers.SUPER_ADMIN]: 'Super Admin',
+        [RolesUsers.ADMIN]: 'Administrador',
+        [RolesUsers.CLIENT]: 'Cliente'
+      };
+      return roleDisplayMap[activeRole] || activeRole;
+    }
+
     const roleDisplayMap = {
-      [UserRole.SUPERADMIN]: 'Super Admin',
-      [UserRole.ADMIN]: 'Administrador',
-      [UserRole.CLIENT]: 'Cliente'
+      [RolesUsers.SUPER_ADMIN]: 'Super Admin',
+      [RolesUsers.ADMIN]: 'Administrador',
+      [RolesUsers.CLIENT]: 'Cliente'
     };
-    return roleDisplayMap[user?.role as UserRole] || 'Usuario';
+
+    const primaryRole = user.roles[0];
+    return roleDisplayMap[primaryRole] || 'Usuario';
+  }
+
+  hasMultipleRoles(): boolean {
+    return this.authService.hasMultipleRoles();
   }
 }

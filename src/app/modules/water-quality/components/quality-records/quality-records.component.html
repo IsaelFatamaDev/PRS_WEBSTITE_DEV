@@ -1,1 +1,98 @@
-<p>quality-records works!</p>
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Incidentes de Calidad</h1>
+      <p class="text-sm text-gray-500 mt-1">Gestión y seguimiento de incidentes de calidad del agua</p>
+    </div>
+    <button (click)="addIncident()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 transition-all duration-200 transform hover:scale-105">
+      <i class="fas fa-plus-circle"></i>
+      Nuevo Incidente
+    </button>
+  </div>
+
+  <!-- Tabla de Incidentes -->
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severidad</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Detección</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolved</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let incident of incidents" class="hover:bg-gray-50 transition-colors duration-200">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{incident.incidentCode}}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{incident.incidentType}}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [ngClass]="{
+                'px-3 py-1.5 text-xs rounded-full font-medium inline-flex items-center': true,
+                'bg-red-100 text-red-800': incident.severity === 'CRITICAL',
+                'bg-orange-100 text-orange-800': incident.severity === 'HIGH',
+                'bg-yellow-100 text-yellow-800': incident.severity === 'MEDIUM',
+                'bg-green-100 text-green-800': incident.severity === 'LOW'
+              }">
+                <i [ngClass]="{
+                  'fas fa-exclamation-triangle mr-1.5': incident.severity === 'CRITICAL',
+                  'fas fa-exclamation-circle mr-1.5': incident.severity === 'HIGH',
+                  'fas fa-exclamation mr-1.5': incident.severity === 'MEDIUM',
+                  'fas fa-check-circle mr-1.5': incident.severity === 'LOW'
+                }"></i>
+                {{incident.severity}}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900 flex items-center">
+                <i class="far fa-calendar-alt mr-2 text-gray-400"></i>
+                {{incident.detectionDate | date:'dd/MM/yyyy'}}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [ngClass]="{
+                'px-3 py-1.5 text-xs rounded-full font-medium inline-flex items-center': true,
+                'bg-green-100 text-green-800': incident.resolved,
+                'bg-red-100 text-red-800': !incident.resolved
+              }">
+                <i [ngClass]="{
+                  'fas fa-check-circle mr-1.5': incident.resolved,
+                  'fas fa-clock mr-1.5': !incident.resolved
+                }"></i>
+                {{incident.resolved ? 'True' : 'False'}}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex items-center space-x-4">
+                <button (click)="viewDetails(incident.id)" 
+                  class="text-emerald-600 hover:text-emerald-800 transition-colors duration-200 p-1.5 rounded-full hover:bg-emerald-50"
+                  title="Ver detalles">
+                  <i class="fas fa-eye text-lg"></i>
+                </button>
+                <button (click)="editIncident(incident.id)" 
+                  class="text-amber-600 hover:text-amber-800 transition-colors duration-200 p-1.5 rounded-full hover:bg-amber-50"
+                  title="Editar">
+                  <i class="fas fa-edit text-lg"></i>
+                </button>
+                <button (click)="deleteIncident(incident.id)" 
+                  class="text-red-600 hover:text-red-800 transition-colors duration-200 p-1.5 rounded-full hover:bg-red-50"
+                  title="Eliminar">
+                  <i class="fas fa-trash-alt text-lg"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+</div>

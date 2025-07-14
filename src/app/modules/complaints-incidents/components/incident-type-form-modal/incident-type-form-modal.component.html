@@ -1,0 +1,71 @@
+<div class="bg-white rounded-xl shadow-xl overflow-hidden">
+  <div class="p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-4 border-b">
+      {{ isEditing ? 'Editar Tipo de Incidencia' : 'Nuevo Tipo de Incidencia' }}
+    </h2>
+
+    <form [formGroup]="incidentTypeForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+
+        <!-- Type Code -->
+        <div>
+          <label for="typeCode" class="block text-sm font-medium text-gray-700 mb-1">Código del Tipo</label>
+          <input id="typeCode" type="text" formControlName="typeCode" placeholder="Ej: RT001"
+                 class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+
+        <!-- Type Name -->
+        <div>
+          <label for="typeName" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Tipo</label>
+          <input id="typeName" type="text" formControlName="typeName" placeholder="Ej: Rotura de Tubería"
+                 class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+
+        <!-- Description -->
+        <div class="md:col-span-2">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <textarea id="description" formControlName="description" rows="4" placeholder="Una descripción detallada de este tipo de incidencia..."
+                    class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+        </div>
+
+        <!-- Priority Level -->
+        <div>
+          <label for="priorityLevel" class="block text-sm font-medium text-gray-700 mb-1">Nivel de Prioridad</label>
+          <select id="priorityLevel" formControlName="priorityLevel"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            <option *ngFor="let level of esPriorityLevels" [value]="level.value">{{level.label}}</option>
+          </select>
+        </div>
+
+        <!-- Estimated Resolution Time -->
+        <div>
+          <label for="estimatedResolutionTime" class="block text-sm font-medium text-gray-700 mb-1">Tiempo Estimado de Resolución (horas)</label>
+          <input id="estimatedResolutionTime" type="number" formControlName="estimatedResolutionTime" min="1"
+                 class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+
+        <!-- Requires External Service -->
+        <div class="md:col-span-2 flex items-center">
+          <input id="requiresExternalService" type="checkbox" formControlName="requiresExternalService"
+                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <label for="requiresExternalService" class="ml-2 block text-sm text-gray-900">
+            Requiere servicio externo
+          </label>
+        </div>
+
+      </div>
+    </form>
+  </div>
+  
+  <!-- Modal Actions -->
+  <div class="bg-gray-50 px-8 py-4 flex justify-end items-center space-x-4">
+    <button type="button" (click)="onCancel()"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all">
+      Cancelar
+    </button>
+    <button type="button" (click)="onSubmit()" [disabled]="!incidentTypeForm.valid"
+            class="inline-flex justify-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all">
+      {{ isEditing ? 'Actualizar Tipo' : 'Crear Tipo' }}
+    </button>
+  </div>
+</div>

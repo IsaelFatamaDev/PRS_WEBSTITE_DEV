@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter, HostListener, ChangeDet
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AnimationService } from '../../../../core/services/animation.service';
-import { UserRole } from '../../../../core/models/auth.model';
+import { RolesUsers } from '../../../../core/models/user.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,11 +16,15 @@ export class SidebarComponent implements OnInit {
   @Input() isSidebarOpen: boolean = true;
   @Input() windowWidth: number = 0;
   @Output() toggleSidebarEvent = new EventEmitter<void>();
-  @Output() optionSelected = new EventEmitter<void>();
-
-  userRole: UserRole | null = null;
-  UserRole = UserRole;
+  @Output() optionSelected = new EventEmitter<void>(); 
+  userRole: RolesUsers[] = [];
+  RolesUsers = RolesUsers;
+  isWaterQualityDropdownOpen: boolean = false;
   isOrganizationsDropdownOpen: boolean = false;
+  isDistributionMenuOpen: boolean = false;
+  isComplaintsIncidentsDropdownOpen: boolean = false;
+  isInfrastructureDropdownOpen: boolean = false;
+  
   constructor(
     public authService: AuthService,
     private animationService: AnimationService,
@@ -35,10 +39,8 @@ export class SidebarComponent implements OnInit {
   ngOnInit() {
     setTimeout(() => {
       this.cdr.detectChanges();
-    }, 100);
-
-    const currentUser = this.authService.getCurrentUser();
-    this.userRole = currentUser?.role || null;
+    }, 100); const currentUser = this.authService.getCurrentUser();
+    this.userRole = currentUser?.roles || [];
 
     const savedState = localStorage.getItem('sidebarState');
     if (savedState !== null) {
@@ -46,6 +48,19 @@ export class SidebarComponent implements OnInit {
     }
   }
 
+
+
+toggleDistributionMenu(): void {
+  this.isDistributionMenuOpen = !this.isDistributionMenuOpen;
+}
+
+  toggleInfrastructureDropdown(): void {
+    this.isInfrastructureDropdownOpen = !this.isInfrastructureDropdownOpen;
+  }
+
+  toggleWaterQualityDropdown() {
+    this.isWaterQualityDropdownOpen = !this.isWaterQualityDropdownOpen;
+  }
   closeSidebar() {
     this.isSidebarOpen = false;
     this.toggleSidebarEvent.emit();
@@ -74,24 +89,46 @@ export class SidebarComponent implements OnInit {
     this.isOrganizationsDropdownOpen = !this.isOrganizationsDropdownOpen;
   }
 
-  hasRole(role: UserRole): boolean {
+  toggleComplaintsIncidentsDropdown(): void {
+    this.isComplaintsIncidentsDropdownOpen = !this.isComplaintsIncidentsDropdownOpen;
+  }
+
+  hasRole(role: RolesUsers): boolean {
+    const activeRole = this.authService.getActiveRole();
+    if (activeRole) {
+      return activeRole === role;
+    }
     return this.authService.hasRole(role);
   }
 
-  hasAnyRole(roles: UserRole[]): boolean {
+  hasAnyRole(roles: RolesUsers[]): boolean {
+    const activeRole = this.authService.getActiveRole();
+    if (activeRole) {
+      return roles.includes(activeRole);
+    }
     return this.authService.hasAnyRole(roles);
+  }
+
+  hasActiveRole(role: RolesUsers): boolean {
+    const activeRole = this.authService.getActiveRole();
+    return activeRole === role;
+  }
+
+  hasAnyActiveRole(roles: RolesUsers[]): boolean {
+    const activeRole = this.authService.getActiveRole();
+    return activeRole ? roles.includes(activeRole) : false;
   }
 
   getCurrentUserName(): string {
     const user = this.authService.getCurrentUser();
-    return user?.name || 'Usuario';
+    return user?.fullName || 'Usuario';
   }
 
   getUserInitials(): string {
     const user = this.authService.getCurrentUser();
-    if (user?.name) {
-      return user.name.split(' ')
-        .map(n => n[0])
+    if (user?.fullName) {
+      return user.fullName.split(' ')
+        .map((n: string) => n[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
@@ -101,25 +138,37 @@ export class SidebarComponent implements OnInit {
 
   getUserRoleDisplay(): string {
     const user = this.authService.getCurrentUser();
+    if (!user?.roles || user.roles.length === 0) return 'Usuario';
+
     const roleDisplayMap = {
-      [UserRole.SUPERADMIN]: 'Super Admin',
-      [UserRole.ADMIN]: 'Administrador',
-      [UserRole.CLIENT]: 'Cliente'
+      [RolesUsers.SUPER_ADMIN]: 'Super Admin',
+      [RolesUsers.ADMIN]: 'Administrador',
+      [RolesUsers.CLIENT]: 'Cliente'
     };
-    return roleDisplayMap[user?.role as UserRole] || 'Usuario';
+
+    if (user.roles.includes(RolesUsers.SUPER_ADMIN)) {
+      return roleDisplayMap[RolesUsers.SUPER_ADMIN];
+    } else if (user.roles.includes(RolesUsers.ADMIN)) {
+      return roleDisplayMap[RolesUsers.ADMIN];
+    } else if (user.roles.includes(RolesUsers.CLIENT)) {
+      return roleDisplayMap[RolesUsers.CLIENT];
+    }
+
+    return 'Usuario';
   }
 
   getDashboardRoute(): string {
     const user = this.authService.getCurrentUser();
-    switch (user?.role) {
-      case UserRole.SUPERADMIN:
-        return '/super-admin/dashboard';
-      case UserRole.ADMIN:
-        return '/admin/dashboard';
-      case UserRole.CLIENT:
-        return '/client/dashboard';
-      default:
-        return '/';
+    if (!user?.roles || user.roles.length === 0) return '/';
+
+    if (user.roles.includes(RolesUsers.SUPER_ADMIN)) {
+      return '/super-admin/dashboard';
+    } else if (user.roles.includes(RolesUsers.ADMIN)) {
+      return '/admin/dashboard';
+    } else if (user.roles.includes(RolesUsers.CLIENT)) {
+      return '/client/dashboard';
     }
+
+    return '/';
   }
 }

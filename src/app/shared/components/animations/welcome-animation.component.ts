@@ -107,7 +107,6 @@ export class WelcomeAnimationComponent implements OnInit {
      animationState = 'in';
 
      ngOnInit() {
-          // Auto-hide after 3 seconds
           setTimeout(() => {
                this.hideAnimation();
           }, 3000);

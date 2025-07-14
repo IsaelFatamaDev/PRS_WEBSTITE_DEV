@@ -1,0 +1,56 @@
+<div class="bg-white rounded-xl shadow-xl overflow-hidden">
+  <div class="p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-4 border-b">
+      {{ isEditing ? 'Editar Respuesta' : 'Nueva Respuesta' }}
+    </h2>
+    <form [formGroup]="responseForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Reclamo</label>
+          <select formControlName="complaintId"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            <option value="">Seleccionar reclamo</option>
+            <option *ngFor="let complaint of complaints" [value]="complaint.id">{{complaint.subject}}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Respuesta</label>
+          <input type="date" formControlName="responseDate"
+                 class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Respondido Por</label>
+          <input type="text" formControlName="respondedByUserId" placeholder="Ej: 60f5e4d2b32a1c3e5a7b8c9d"
+                 class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Calificación de Satisfacción</label>
+          <input type="number" formControlName="satisfactionRating" min="1" max="5" placeholder="Calificación del 1 al 5 (5 = muy satisfecho)"
+                 class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Texto de Respuesta</label>
+        <textarea formControlName="message" rows="4" placeholder="Detalle la respuesta al reclamo, incluyendo acciones tomadas, soluciones propuestas y cualquier información adicional relevante para el usuario..."
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+      </div>
+      <div class="flex items-center">
+        <input id="isSolution" type="checkbox" formControlName="isSolution"
+               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+        <label for="isSolution" class="ml-2 block text-sm text-gray-900">
+          Esta respuesta resuelve el reclamo
+        </label>
+      </div>
+    </form>
+  </div>
+  <div class="bg-gray-50 px-8 py-4 flex justify-end items-center space-x-4">
+    <button type="button" (click)="onCancel()"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all">
+      Cancelar
+    </button>
+    <button type="button" (click)="onSubmit()" [disabled]="!responseForm.valid"
+            class="inline-flex justify-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all">
+      {{ isEditing ? 'Actualizar Respuesta' : 'Crear Respuesta' }}
+    </button>
+  </div>
+</div>

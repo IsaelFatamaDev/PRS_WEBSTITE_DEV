@@ -13,9 +13,7 @@ import { CommonModule } from '@angular/common';
       [@fadeInOut]="animationState"
       (@fadeInOut.done)="onAnimationDone($event)">
 
-      <!-- Main Content -->
       <div class="text-center">
-        <!-- Logo Animation -->
         <div
           class="mb-8"
           [@logoAnimation]="animationState">
@@ -30,7 +28,6 @@ import { CommonModule } from '@angular/common';
           </div>
         </div>
 
-        <!-- Goodbye Text -->
         <div [@textAnimation]="animationState">
           <h1 class="text-5xl font-bold text-white mb-4 tracking-wide">
             ¡Hasta Luego!
@@ -39,7 +36,6 @@ import { CommonModule } from '@angular/common';
             Gracias por usar Sistema JASS
           </h2>
 
-          <!-- Loading dots -->
           <div class="flex justify-center space-x-2">
             <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 0ms"></div>
             <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 150ms"></div>
@@ -48,7 +44,6 @@ import { CommonModule } from '@angular/common';
         </div>
       </div>
 
-      <!-- Floating particles -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-white/30 rounded-full animate-float-slow"></div>
         <div class="absolute top-1/3 right-1/4 w-1 h-1 bg-white/40 rounded-full animate-float-fast"></div>
@@ -112,7 +107,6 @@ export class GoodbyeAnimationComponent implements OnInit {
   animationState = 'in';
 
   ngOnInit() {
-    // Auto-hide after 2.5 seconds
     setTimeout(() => {
       this.hideAnimation();
     }, 2500);

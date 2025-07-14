@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  # Aplicación Angular Frontend
+  sistema-jass-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sistema-jass-web
+    ports:
+      - "80:80"
+      - "443:443" # Si necesitas HTTPS
+    environment:
+      - NODE_ENV=production
+    networks:
+      - sistema-jass-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Servicio de base de datos (opcional - descomenta si necesitas)
+  # sistema-jass-db:
+  #   image: postgres:15-alpine
+  #   container_name: sistema-jass-db
+  #   environment:
+  #     POSTGRES_DB: sistema_jass
+  #     POSTGRES_USER: jass_user
+  #     POSTGRES_PASSWORD: jass_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - sistema-jass-network
+  #   restart: unless-stopped
+
+  # Servicio de backend API (opcional - descomenta si tienes backend)
+  # sistema-jass-api:
+  #   build:
+  #     context: ./backend  # Ruta a tu backend
+  #     dockerfile: Dockerfile
+  #   container_name: sistema-jass-api
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - DATABASE_URL=postgresql://jass_user:jass_password@sistema-jass-db:5432/sistema_jass
+  #   networks:
+  #     - sistema-jass-network
+  #   depends_on:
+  #     - sistema-jass-db
+  #   restart: unless-stopped
+
+networks:
+  sistema-jass-network:
+    driver: bridge
+# Volúmenes (descomenta si usas base de datos)
+# volumes:
+#   postgres_data:

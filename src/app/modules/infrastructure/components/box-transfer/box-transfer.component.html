@@ -1,0 +1,131 @@
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold text-sky-900">Transferencias de Cajas de Agua</h2>
+      <div class="flex space-x-2">
+        <button (click)="openModal(false)" class="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          <span>Nueva Transferencia</span>
+        </button>
+      </div>
+    </div>
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-sky-500"></div>
+    <p class="ml-4 text-sky-700 text-lg">Cargando transferencias de cajas de agua...</p>
+  </div>
+  <div *ngIf="!loading" class="bg-white shadow-xl rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full leading-normal">
+        <thead>
+          <tr class="bg-sky-700 text-white uppercase text-sm leading-normal">
+            <th class="py-3 px-6 text-left">ID</th>
+            <th class="py-3 px-6 text-left">Water Box ID</th>
+            <th class="py-3 px-6 text-left">Old Assignment ID</th>
+            <th class="py-3 px-6 text-left">New Assignment ID</th>
+            <th class="py-3 px-6 text-left">Motivo</th>
+            <th class="py-3 px-6 text-left">Documento URL</th>
+            <th class="py-3 px-6 text-left">Created At</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700 text-sm font-light">
+          <tr *ngFor="let t of transfers" class="border-b border-gray-200 hover:bg-gray-100">
+            <td class="py-3 px-6 text-left whitespace-nowrap">{{ t.id }}</td>
+            <td class="py-3 px-6 text-left">{{ t.waterBoxId }}</td>
+            <td class="py-3 px-6 text-left">{{ t.oldAssignmentId }}</td>
+            <td class="py-3 px-6 text-left">{{ t.newAssignmentId }}</td>
+            <td class="py-3 px-6 text-left">{{ t.transferReason }}</td>
+            <td class="py-3 px-6 text-left">
+              <div class="flex flex-wrap gap-1">
+                <span *ngFor="let doc of t.documents"
+                  class="px-2 py-1 rounded text-white text-xs font-semibold"
+                  [ngClass]="{
+                    'bg-blue-500': detectDocumentType(doc) === 'pdf',
+                    'bg-green-500': detectDocumentType(doc) === 'jpg' || detectDocumentType(doc) === 'png',
+                    'bg-purple-500': detectDocumentType(doc) === 'docx',
+                    'bg-orange-500': detectDocumentType(doc) === 'xlsx',
+                    'bg-gray-500': detectDocumentType(doc) === 'other'
+                  }"
+                >
+                  {{ doc.split('/').pop() }} <!-- Display filename -->
+                </span>
+              </div>
+            </td>
+            <td class="py-3 px-6 text-left">
+              <div>{{ t.createdAt | date: 'dd - MMMM - yyyy' }}</div>
+              <div class="text-gray-500 text-xs">{{ t.createdAt | date: 'shortTime' }}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <!-- Modal -->
+  <div *ngIf="showModal" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative animate-fadeIn">
+      <button class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-sky-700" (click)="closeModal()">x</button>
+      <div class="text-xl font-bold mb-4 text-sky-800">{{ isEdit ? 'Editar Transferencia' : 'Nueva Transferencia' }}</div>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-3">
+        <label class="block">
+          <span class="text-sky-900 font-medium">Water Box ID:</span>
+          <input formControlName="waterBoxId" type="number" class="mt-1 w-full border border-sky-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400" [ngClass]="{'border-red-500': form.get('waterBoxId')?.invalid && form.get('waterBoxId')?.touched}" />
+          <div *ngIf="form.get('waterBoxId')?.invalid && form.get('waterBoxId')?.touched" class="text-red-500 text-xs mt-1">Water Box ID is required.</div>
+        </label>
+        <label class="block">
+          <span class="text-sky-900 font-medium">Old Assignment ID:</span>
+          <input formControlName="oldAssignmentId" type="number" class="mt-1 w-full border border-sky-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400" [ngClass]="{'border-red-500': form.get('oldAssignmentId')?.invalid && form.get('oldAssignmentId')?.touched}" />
+          <div *ngIf="form.get('oldAssignmentId')?.invalid && form.get('oldAssignmentId')?.touched" class="text-red-500 text-xs mt-1">Old Assignment ID is required.</div>
+        </label>
+        <label class="block">
+          <span class="text-sky-900 font-medium">New Assignment ID:</span>
+          <input formControlName="newAssignmentId" type="number" class="mt-1 w-full border border-sky-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400" [ngClass]="{'border-red-500': form.get('newAssignmentId')?.invalid && form.get('newAssignmentId')?.touched}" />
+          <div *ngIf="form.get('newAssignmentId')?.invalid && form.get('newAssignmentId')?.touched" class="text-red-500 text-xs mt-1">New Assignment ID is required.</div>
+        </label>
+
+
+        <label class="block">
+          <span class="text-sky-900 font-medium">Motivo de Transferencia:</span>
+          <input formControlName="transferReason" type="text" class="mt-1 w-full border border-sky-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400" />
+        </label>
+        <div formArrayName="documents" class="space-y-2">
+          <label class="block">
+            <span class="text-sky-900 font-medium">Documentos:</span>
+          </label>
+          <div *ngFor="let docControl of documents.controls; let i = index" [formGroupName]="i" class="flex items-center space-x-2">
+            <input formControlName="url" type="text" placeholder="URL del documento" class="mt-1 w-full border border-sky-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400" />
+            <span
+              class="px-2 py-1 rounded text-white text-xs font-semibold"
+              [ngClass]="{
+                'bg-blue-500': docControl.get('type')?.value === 'pdf',
+                'bg-green-500': docControl.get('type')?.value === 'jpg' || docControl.get('type')?.value === 'png',
+                'bg-purple-500': docControl.get('type')?.value === 'docx',
+                'bg-orange-500': docControl.get('type')?.value === 'xlsx',
+                'bg-gray-500': docControl.get('type')?.value === 'other'
+              }"
+            >
+              {{ docControl.get('type')?.value | uppercase }}
+            </span>
+            <button type="button" (click)="removeDocument(i)" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <button type="button" (click)="addDocument()" class="px-4 py-2 bg-sky-600 text-white rounded shadow hover:bg-sky-700 flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            <span>Agregar Documento</span>
+          </button>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="submit" [disabled]="form.invalid" class="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded shadow">{{ isEdit ? 'Actualizar' : 'Crear' }}</button>
+          <button type="button" (click)="closeModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sky-900 rounded shadow">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

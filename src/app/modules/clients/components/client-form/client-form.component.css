@@ -1,0 +1,130 @@
+/* Form container styles */
+.form-container {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+/* Form section styles */
+.form-section {
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6;
+}
+
+.form-section h3 {
+  @apply text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2;
+}
+
+/* Form grid layouts */
+.form-grid-2 {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.form-grid-3 {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-6;
+}
+
+/* Form input styles */
+.form-input {
+  @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+}
+
+.form-input.error {
+  @apply border-red-300 dark:border-red-600;
+}
+
+.form-input.success {
+  @apply border-green-300 dark:border-green-600;
+}
+
+.form-input.success:focus {
+  @apply ring-green-500;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.form-error {
+  @apply mt-1 text-sm text-red-600 dark:text-red-400;
+}
+
+/* Required asterisk */
+.required {
+  @apply text-red-500;
+}
+
+/* Form actions */
+.form-actions {
+  @apply flex flex-col sm:flex-row gap-4 justify-end mt-8 pt-6 border-t border-gray-200 dark:border-gray-700;
+}
+
+/* Button styles */
+.btn {
+  @apply px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105 shadow-lg hover:shadow-xl;
+}
+
+.btn-secondary {
+  @apply border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700;
+}
+
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed transform-none shadow-none;
+}
+
+/* Loading states */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+}
+
+/* Password strength indicator styles */
+.password-strength-bar {
+  transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.password-criteria-item {
+  @apply flex items-center gap-2 text-xs transition-colors duration-200;
+}
+
+.password-criteria-item.met {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.password-criteria-item.not-met {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* Validation feedback styles */
+.validation-feedback {
+  @apply mt-1 text-sm;
+}
+
+.validation-feedback.success {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.validation-feedback.error {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.validation-feedback.warning {
+  @apply text-orange-600 dark:text-orange-400;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .form-section {
+    @apply p-4;
+  }
+
+  .form-grid-2,
+  .form-grid-3 {
+    @apply grid-cols-1;
+  }
+
+  .form-actions {
+    @apply flex-col;
+  }
+}
