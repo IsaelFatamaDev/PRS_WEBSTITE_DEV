@@ -16,5 +16,10 @@ export const ADMIN_ROUTES: Routes = [
         path: 'reports',
         loadComponent: () => import('./reports/reports.component').then(c => c.ReportsComponent),
         canActivate: [adminGuard]
+    },
+    {
+        path: 'inventory',
+        loadChildren: () => import('../../modules/inventory/inventory.module').then(m => m.InventoryModule),
+        canActivate: [adminGuard]
     }
 ];

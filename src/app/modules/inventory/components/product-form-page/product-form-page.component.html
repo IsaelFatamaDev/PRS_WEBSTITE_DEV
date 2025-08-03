@@ -1,0 +1,238 @@
+<div class="min-h-screen bg-gray-50 py-8">
+     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Header -->
+          <div class="bg-white shadow rounded-lg mb-6">
+               <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                         <div>
+                              <h1 class="text-2xl font-bold text-gray-900">
+                                   {{ isEditMode ? 'Editar Producto' : 'Nuevo Producto' }}
+                              </h1>
+                              <p class="text-sm text-gray-600 mt-1">
+                                   {{ isEditMode ? 'Modifica los datos del producto' : 'Registra un nuevo producto en el
+                                   inventario' }}
+                              </p>
+                         </div>
+                         <button (click)="goBack()"
+                              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                              <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"
+                                   viewBox="0 0 24 24">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                              </svg>
+                              Volver
+                         </button>
+                    </div>
+               </div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loading" class="bg-white shadow rounded-lg p-6">
+               <div class="text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Cargando datos...</p>
+               </div>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+               <div class="flex">
+                    <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                         <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-red-700">{{ error }}</p>
+               </div>
+          </div>
+
+          <!-- Form -->
+          <div *ngIf="!loading" class="bg-white shadow rounded-lg">
+               <!-- Information Banner -->
+               <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <div class="flex">
+                         <div class="flex-shrink-0">
+                              <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                        clip-rule="evenodd" />
+                              </svg>
+                         </div>
+                         <div class="ml-3">
+                              <p class="text-sm text-blue-700">
+                                   <strong>Información:</strong> El código del producto se genera automáticamente.
+                                   Asegúrate de configurar correctamente los stocks mínimo y máximo para un mejor
+                                   control del inventario.
+                              </p>
+                         </div>
+                    </div>
+               </div>
+
+               <form (ngSubmit)="onSubmit()" class="space-y-6">
+                    <div class="px-6 py-6">
+                         <!-- Basic Information -->
+                         <div class="mb-8">
+                              <h3 class="text-lg font-medium text-gray-900 mb-4">Información Básica</h3>
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                   <!-- Product Code (Edit Mode) -->
+                                   <div *ngIf="isEditMode">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Código de
+                                             Producto</label>
+                                        <input type="text" [(ngModel)]="productForm.productCode" name="productCode"
+                                             readonly
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed">
+                                   </div>
+
+                                   <!-- Product Name -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto
+                                             *</label>
+                                        <input type="text" [(ngModel)]="productForm.productName" name="productName"
+                                             required placeholder="Ingresa el nombre del producto"
+                                             [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                  (!productForm.productName ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                        <span *ngIf="!productForm.productName" class="text-xs text-red-500 mt-1 block">
+                                             Este campo es obligatorio
+                                        </span>
+                                   </div>
+
+                                   <!-- Category -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+                                        <select [(ngModel)]="productForm.categoryId" name="categoryId" required
+                                             [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                  (!productForm.categoryId ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                             <option value="">Seleccionar categoría</option>
+                                             <option *ngFor="let category of categories" [value]="category.categoryId">
+                                                  {{ category.categoryName }}
+                                             </option>
+                                        </select>
+                                        <span *ngIf="!productForm.categoryId" class="text-xs text-red-500 mt-1 block">
+                                             Selecciona una categoría
+                                        </span>
+                                   </div>
+
+                                   <!-- Unit of Measure -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida
+                                             *</label>
+                                        <select [(ngModel)]="productForm.unitOfMeasure" name="unitOfMeasure" required
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                             <option [value]="UnitOfMeasure.UNIDAD">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.UNIDAD) }}</option>
+                                             <option [value]="UnitOfMeasure.KG">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.KG) }}</option>
+                                             <option [value]="UnitOfMeasure.LITRO">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.LITRO) }}</option>
+                                             <option [value]="UnitOfMeasure.METRO">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.METRO) }}</option>
+                                             <option [value]="UnitOfMeasure.M2">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.M2) }}</option>
+                                             <option [value]="UnitOfMeasure.M3">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.M3) }}</option>
+                                             <option [value]="UnitOfMeasure.CAJA">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.CAJA) }}</option>
+                                             <option [value]="UnitOfMeasure.PAR">{{
+                                                  getUnitOfMeasureText(UnitOfMeasure.PAR) }}</option>
+                                        </select>
+                                   </div>
+
+                                   <!-- Status -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
+                                        <select [(ngModel)]="productForm.status" name="status" required
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                             <option [value]="ProductStatus.ACTIVO">{{
+                                                  getStatusText(ProductStatus.ACTIVO) }}</option>
+                                             <option [value]="ProductStatus.INACTIVO">{{
+                                                  getStatusText(ProductStatus.INACTIVO) }}</option>
+                                             <option [value]="ProductStatus.DESCONTINUADO">{{
+                                                  getStatusText(ProductStatus.DESCONTINUADO) }}</option>
+                                        </select>
+                                   </div>
+                              </div>
+                         </div>
+
+                         <!-- Stock Information -->
+                         <div class="mb-8">
+                              <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Stock</h3>
+                              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                   <!-- Current Stock -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock Actual
+                                             *</label>
+                                        <input type="number" [(ngModel)]="productForm.currentStock" name="currentStock"
+                                             min="0" required placeholder="0"
+                                             [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                  (productForm.currentStock < 0 ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                        <span *ngIf="productForm.currentStock < 0"
+                                             class="text-xs text-red-500 mt-1 block">
+                                             El stock no puede ser negativo
+                                        </span>
+                                   </div>
+
+                                   <!-- Minimum Stock -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo
+                                             *</label>
+                                        <input type="number" [(ngModel)]="productForm.minimumStock" name="minimumStock"
+                                             min="0" required placeholder="0"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                   </div>
+
+                                   <!-- Maximum Stock -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock Máximo</label>
+                                        <input type="number" [(ngModel)]="productForm.maximumStock" name="maximumStock"
+                                             min="0" placeholder="0"
+                                             [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                  (productForm.maximumStock > 0 && productForm.minimumStock > productForm.maximumStock ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                        <span *ngIf="productForm.maximumStock > 0 && productForm.minimumStock > productForm.maximumStock"
+                                             class="text-xs text-red-500 mt-1 block">
+                                             El stock máximo debe ser mayor al mínimo
+                                        </span>
+                                   </div>
+                              </div>
+                         </div>
+
+                         <!-- Cost Information -->
+                         <div>
+                              <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Costo</h3>
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                   <!-- Unit Cost -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Costo Unitario
+                                             *</label>
+                                        <div class="relative">
+                                             <span
+                                                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">S/</span>
+                                             <input type="number" [(ngModel)]="productForm.unitCost" name="unitCost"
+                                                  min="0" step="0.01" required placeholder="0.00"
+                                                  [class]="'w-full pl-8 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                       (productForm.unitCost < 0 ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                        </div>
+                                        <span *ngIf="productForm.unitCost < 0" class="text-xs text-red-500 mt-1 block">
+                                             El costo no puede ser negativo
+                                        </span>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                         <button type="button" (click)="goBack()"
+                              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                              Cancelar
+                         </button>
+                         <button type="submit" [disabled]="!isFormValid() || saving"
+                              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-md transition-colors duration-200">
+                              <span *ngIf="saving"
+                                   class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                              {{ saving ? 'Guardando...' : (isEditMode ? 'Actualizar Producto' : 'Crear Producto') }}
+                         </button>
+                    </div>
+               </form>
+          </div>
+     </div>
+</div>

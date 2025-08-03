@@ -127,8 +127,8 @@ export class ApiService {
     );
   }
 
-    // Methods for infrastructure microservice (direct response without ApiResponse wrapper)
-  
+  // Methods for infrastructure microservice (direct response without ApiResponse wrapper)
+
   /**
    * GET request with full URL for infrastructure microservice (direct response)
    */
@@ -181,6 +181,75 @@ export class ApiService {
     return this.http.delete<T>(fullUrl, {
       headers: this.getHeaders()
     }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Methods for inventory microservice (direct response with full URL)
+
+  /**
+   * GET request with full URL for inventory microservice (handles status response format)
+   */
+  getInventoryDirect<T>(fullUrl: string, params?: HttpParams): Observable<T> {
+    return this.http.get<{ status: boolean, data: T }>(fullUrl, {
+      headers: this.getHeaders(),
+      params
+    }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * POST request with full URL for inventory microservice (handles status response format)
+   */
+  postInventoryDirect<T>(fullUrl: string, data: any): Observable<T> {
+    return this.http.post<{ status: boolean, data: T }>(fullUrl, data, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * PUT request with full URL for inventory microservice (handles status response format)
+   */
+  putInventoryDirect<T>(fullUrl: string, data: any): Observable<T> {
+    return this.http.put<{ status: boolean, data: T }>(fullUrl, data, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * PATCH request with full URL for inventory microservice (handles status response format)
+   */
+  patchInventoryDirect<T>(fullUrl: string, data: any): Observable<T> {
+    return this.http.patch<{ status: boolean, data: T }>(fullUrl, data, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * DELETE request with full URL for inventory microservice (handles status response format)
+   */
+  deleteInventoryDirect<T>(fullUrl: string): Observable<T> {
+    return this.http.delete<{ status: boolean, data: T }>(fullUrl, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        // Manejar caso donde response puede ser null o undefined
+        if (!response) {
+          return null as T;
+        }
+        return response.data;
+      }),
       catchError(this.handleError)
     );
   }

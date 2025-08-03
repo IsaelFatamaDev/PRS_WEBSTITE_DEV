@@ -1,0 +1,212 @@
+<div class="min-h-screen bg-gray-50 py-8">
+     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Header -->
+          <div class="bg-white shadow rounded-lg mb-6">
+               <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                         <div>
+                              <h1 class="text-2xl font-bold text-gray-900">Detalles de la Compra</h1>
+                              <p class="text-sm text-gray-600 mt-1" *ngIf="purchase">
+                                   Código: {{ purchase.purchaseCode }}
+                              </p>
+                         </div>
+                         <div class="flex space-x-3">
+                              <button (click)="editPurchase()" *ngIf="purchase && purchase.status === 'PENDIENTE'"
+                                   class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                   <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                   </svg>
+                                   Editar
+                              </button>
+                              <button (click)="goBack()"
+                                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                   <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                   </svg>
+                                   Volver
+                              </button>
+                         </div>
+                    </div>
+               </div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loading" class="bg-white shadow rounded-lg p-6">
+               <div class="text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Cargando detalles...</p>
+               </div>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+               <div class="flex">
+                    <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                         <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-red-700">{{ error }}</p>
+               </div>
+          </div>
+
+          <!-- Purchase Details -->
+          <div *ngIf="purchase && !loading" class="bg-white shadow rounded-lg">
+               <div class="px-6 py-6">
+                    <!-- Purchase Information -->
+                    <div class="mb-8">
+                         <h3 class="text-lg font-medium text-gray-900 mb-4">Información General</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              <div>
+                                   <span class="text-sm font-medium text-gray-500">Código:</span>
+                                   <p class="text-base text-gray-900 font-mono">{{ purchase.purchaseCode }}</p>
+                              </div>
+                              <div>
+                                   <span class="text-sm font-medium text-gray-500">Proveedor:</span>
+                                   <p class="text-base text-gray-900">{{ purchase.supplierName }}</p>
+                              </div>
+                              <div>
+                                   <span class="text-sm font-medium text-gray-500">Estado:</span>
+                                   <span [class]="getStatusBadgeClass(purchase.status)"
+                                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                                        {{ getStatusText(purchase.status) }}
+                                   </span>
+                              </div>
+                              <div>
+                                   <span class="text-sm font-medium text-gray-500">Fecha de Compra:</span>
+                                   <p class="text-base text-gray-900">{{ purchase.purchaseDate | date:'dd/MM/yyyy' }}
+                                   </p>
+                              </div>
+                              <div *ngIf="purchase.deliveryDate">
+                                   <span class="text-sm font-medium text-gray-500">Fecha de Entrega:</span>
+                                   <p class="text-base text-gray-900">{{ purchase.deliveryDate | date:'dd/MM/yyyy' }}
+                                   </p>
+                              </div>
+                              <div>
+                                   <span class="text-sm font-medium text-gray-500">Monto Total:</span>
+                                   <p class="text-lg font-bold text-gray-900">{{ purchase.totalAmount |
+                                        currency:'PEN':'symbol':'1.2-2' }}</p>
+                              </div>
+                              <div>
+                                   <span class="text-sm font-medium text-gray-500">Solicitado por:</span>
+                                   <p class="text-base text-gray-900">{{ getUserFullName(purchase.requestedByUserId) }}
+                                   </p>
+                              </div>
+                              <div *ngIf="purchase.approvedByUserId">
+                                   <span class="text-sm font-medium text-gray-500">Aprobado por:</span>
+                                   <p class="text-base text-gray-900">{{ getUserFullName(purchase.approvedByUserId) }}
+                                   </p>
+                              </div>
+                              <div *ngIf="purchase.invoiceNumber">
+                                   <span class="text-sm font-medium text-gray-500">Número de Factura:</span>
+                                   <p class="text-base text-gray-900">{{ purchase.invoiceNumber }}</p>
+                              </div>
+                         </div>
+
+                         <!-- Observations -->
+                         <div *ngIf="purchase.observations" class="mt-6">
+                              <span class="text-sm font-medium text-gray-500">Observaciones:</span>
+                              <p class="text-base text-gray-900 mt-1 p-3 bg-gray-50 rounded-md">{{ purchase.observations
+                                   }}</p>
+                         </div>
+                    </div>
+
+                    <!-- Purchase Details -->
+                    <div>
+                         <h3 class="text-lg font-medium text-gray-900 mb-4">Detalles de Items</h3>
+                         <div class="overflow-x-auto">
+                              <table class="min-w-full divide-y divide-gray-200">
+                                   <thead class="bg-gray-50">
+                                        <tr>
+                                             <th
+                                                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Producto
+                                             </th>
+                                             <th
+                                                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Código
+                                             </th>
+                                             <th
+                                                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Cantidad
+                                             </th>
+                                             <th
+                                                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Precio Unit.
+                                             </th>
+                                             <th
+                                                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Subtotal
+                                             </th>
+                                             <th
+                                                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Observaciones
+                                             </th>
+                                        </tr>
+                                   </thead>
+                                   <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr *ngFor="let detail of purchase.details" class="hover:bg-gray-50">
+                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                  <div class="text-sm font-medium text-gray-900">{{ detail.productName
+                                                       }}</div>
+                                             </td>
+                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                  <div class="text-sm text-gray-500 font-mono">{{ detail.productCode }}
+                                                  </div>
+                                             </td>
+                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                  <div class="text-sm text-gray-900">{{ detail.quantityOrdered }}</div>
+                                                  <div *ngIf="detail.quantityReceived !== detail.quantityOrdered"
+                                                       class="text-xs text-orange-600">
+                                                       Recibido: {{ detail.quantityReceived || 0 }}
+                                                  </div>
+                                             </td>
+                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                  <div class="text-sm text-gray-900">{{ detail.unitCost |
+                                                       currency:'PEN':'symbol':'1.2-2' }}</div>
+                                             </td>
+                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                  <div class="text-sm font-medium text-gray-900">{{ detail.subtotal |
+                                                       currency:'PEN':'symbol':'1.2-2' }}</div>
+                                             </td>
+                                             <td class="px-6 py-4">
+                                                  <div class="text-sm text-gray-500">{{ detail.observations || '-' }}
+                                                  </div>
+                                             </td>
+                                        </tr>
+                                   </tbody>
+                                   <tfoot class="bg-gray-50">
+                                        <tr>
+                                             <td colspan="4"
+                                                  class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                                                  Total:
+                                             </td>
+                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                  <div class="text-lg font-bold text-gray-900">{{ purchase.totalAmount |
+                                                       currency:'PEN':'symbol':'1.2-2' }}</div>
+                                             </td>
+                                             <td></td>
+                                        </tr>
+                                   </tfoot>
+                              </table>
+                         </div>
+                    </div>
+
+                    <!-- Timestamps -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-500">
+                              <div>
+                                   <span class="font-medium">Fecha de creación:</span>
+                                   <p>{{ purchase.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </div>
+</div>

@@ -1,0 +1,280 @@
+<div class="min-h-screen bg-gray-50 py-8">
+     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Header -->
+          <div class="bg-white shadow rounded-lg mb-6">
+               <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                         <div>
+                              <h1 class="text-2xl font-bold text-gray-900">
+                                   {{ isEditMode ? 'Editar Compra' : 'Nueva Compra' }}
+                              </h1>
+                              <p class="text-sm text-gray-600 mt-1">
+                                   {{ isEditMode ? 'Modifica los datos de la compra' : 'Registra una nueva compra al
+                                   inventario' }}
+                              </p>
+                         </div>
+                         <button (click)="goBack()"
+                              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                              <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"
+                                   viewBox="0 0 24 24">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                              </svg>
+                              Volver
+                         </button>
+                    </div>
+               </div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loading" class="bg-white shadow rounded-lg p-6">
+               <div class="text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Cargando datos...</p>
+               </div>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+               <div class="flex">
+                    <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                         <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-red-700">{{ error }}</p>
+               </div>
+          </div>
+
+          <!-- Form -->
+          <div *ngIf="!loading" class="bg-white shadow rounded-lg">
+               <!-- Information Banner -->
+               <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <div class="flex">
+                         <div class="flex-shrink-0">
+                              <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                        clip-rule="evenodd" />
+                              </svg>
+                         </div>
+                         <div class="ml-3">
+                              <p class="text-sm text-blue-700">
+                                   <strong>Información:</strong> La fecha se establece automáticamente a hoy.
+                                   Los precios se cargan automáticamente al seleccionar productos.
+                                   Primero selecciona un proveedor para ver los productos disponibles.
+                              </p>
+                         </div>
+                    </div>
+               </div>
+
+               <form (ngSubmit)="onSubmit()" class="space-y-6">
+                    <div class="px-6 py-6">
+                         <!-- Basic Information -->
+                         <div class="mb-8">
+                              <h3 class="text-lg font-medium text-gray-900 mb-4">Información General</h3>
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                   <!-- Purchase Code (Edit Mode) -->
+                                   <div *ngIf="isEditMode">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Código de
+                                             Compra</label>
+                                        <input type="text" [(ngModel)]="purchaseForm.purchaseCode" name="purchaseCode"
+                                             readonly
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed">
+                                   </div>
+
+                                   <!-- Supplier -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label>
+                                        <select [(ngModel)]="purchaseForm.supplierId" name="supplierId" required
+                                             (change)="onSupplierChange()"
+                                             [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                  (!purchaseForm.supplierId ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                             <option value="">Seleccionar proveedor</option>
+                                             <option *ngFor="let supplier of suppliers" [value]="supplier.supplierId">
+                                                  {{ supplier.supplierName }}
+                                             </option>
+                                        </select>
+                                        <span *ngIf="!purchaseForm.supplierId" class="text-xs text-red-500 mt-1 block">
+                                             Este campo es obligatorio
+                                        </span>
+                                   </div>
+
+                                   <!-- Purchase Date -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Compra
+                                             *</label>
+                                        <input type="date" [(ngModel)]="purchaseForm.purchaseDate" name="purchaseDate"
+                                             required readonly
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed">
+                                        <span class="text-xs text-gray-500 mt-1 block">Fecha automática (hoy)</span>
+                                   </div>
+
+                                   <!-- Delivery Date -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de
+                                             Entrega</label>
+                                        <input type="date" [(ngModel)]="purchaseForm.deliveryDate" name="deliveryDate"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                   </div>
+
+                                   <!-- Requested By (Auto-filled) -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Solicitado
+                                             por</label>
+                                        <input type="text" [value]="getCurrentUserName()" readonly
+                                             placeholder="Usuario actual"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed">
+                                        <input type="hidden" [(ngModel)]="purchaseForm.requestedByUserId"
+                                             name="requestedByUserId" required>
+                                   </div>
+
+                                   <!-- Invoice Number -->
+                                   <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Número de
+                                             Factura</label>
+                                        <input type="text" [(ngModel)]="purchaseForm.invoiceNumber" name="invoiceNumber"
+                                             placeholder="Número de factura"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                   </div>
+                              </div>
+
+                              <!-- Observations -->
+                              <div class="mt-6">
+                                   <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                                   <textarea [(ngModel)]="purchaseForm.observations" name="observations" rows="3"
+                                        placeholder="Observaciones adicionales..."
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                              </div>
+                         </div>
+
+                         <!-- Purchase Details -->
+                         <div>
+                              <div class="flex justify-between items-center mb-4">
+                                   <h3 class="text-lg font-medium text-gray-900">Detalles de la Compra</h3>
+                                   <button type="button" (click)="addDetail()" [disabled]="!purchaseForm.supplierId"
+                                        class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        {{ !purchaseForm.supplierId ? 'Selecciona proveedor primero' : 'Agregar Item' }}
+                                   </button>
+                              </div>
+
+                              <div class="space-y-4">
+                                   <div *ngFor="let detail of purchaseDetails; let i = index"
+                                        class="border border-gray-200 rounded-lg p-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                             <!-- Product -->
+                                             <div>
+                                                  <label class="block text-sm font-medium text-gray-700 mb-1">Producto
+                                                       *</label>
+                                                  <select [(ngModel)]="detail.productId" [name]="'product_' + i"
+                                                       (change)="onProductChange(detail, i)" required
+                                                       [disabled]="!purchaseForm.supplierId"
+                                                       [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                            (!purchaseForm.supplierId ? 'disabled:bg-gray-100 disabled:cursor-not-allowed border-gray-300' :
+                                                             (!detail.productId ? 'border-red-300 bg-red-50' : 'border-gray-300'))">
+                                                       <option value="">
+                                                            {{ !purchaseForm.supplierId ? 'Primero selecciona un
+                                                            proveedor' : 'Seleccionar producto' }}
+                                                       </option>
+                                                       <option *ngFor="let product of filteredProducts"
+                                                            [value]="product.productId">
+                                                            {{ product.productName }}
+                                                            <span class="text-gray-500">(Stock: {{ product.currentStock
+                                                                 || 0 }})</span>
+                                                       </option>
+                                                  </select>
+                                                  <span *ngIf="purchaseForm.supplierId && !detail.productId"
+                                                       class="text-xs text-red-500 mt-1 block">
+                                                       Selecciona un producto
+                                                  </span>
+                                             </div>
+
+                                             <!-- Quantity -->
+                                             <div>
+                                                  <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad
+                                                       *</label>
+                                                  <input type="number" [(ngModel)]="detail.quantity"
+                                                       [name]="'quantity_' + i" min="1" required
+                                                       (input)="onQuantityChange(detail, i)"
+                                                       [class]="'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+                                                            (detail.quantity <= 0 ? 'border-red-300 bg-red-50' : 'border-gray-300')">
+                                                  <span *ngIf="detail.quantity <= 0"
+                                                       class="text-xs text-red-500 mt-1 block">
+                                                       La cantidad debe ser mayor a 0
+                                                  </span>
+                                             </div>
+
+                                             <!-- Unit Price -->
+                                             <div>
+                                                  <label class="block text-sm font-medium text-gray-700 mb-1">Precio
+                                                       Unitario *</label>
+                                                  <input type="number" [(ngModel)]="detail.unitPrice"
+                                                       [name]="'unitPrice_' + i" min="0" step="0.01" required readonly
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed">
+                                                  <span class="text-xs text-gray-500 mt-1 block">Precio automático del
+                                                       producto</span>
+                                             </div>
+
+                                             <!-- Actions -->
+                                             <div class="flex items-end">
+                                                  <button type="button" (click)="removeDetail(i)"
+                                                       [disabled]="purchaseDetails.length === 1"
+                                                       class="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white px-3 py-2 rounded-md transition-colors duration-200">
+                                                       Eliminar
+                                                  </button>
+                                             </div>
+                                        </div>
+
+                                        <!-- Detail Observations -->
+                                        <div class="mt-3">
+                                             <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones
+                                                  del Item</label>
+                                             <input type="text" [(ngModel)]="detail.observations"
+                                                  [name]="'detailObs_' + i"
+                                                  placeholder="Observaciones específicas del item..."
+                                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+
+                                        <!-- Detail Total -->
+                                        <div class="mt-2 text-right">
+                                             <span class="text-sm font-medium text-gray-700">
+                                                  Subtotal: {{ getDetailTotal(detail) | currency:'PEN':'symbol':'1.2-2'
+                                                  }}
+                                             </span>
+                                        </div>
+                                   </div>
+                              </div>
+
+                              <!-- Total Amount -->
+                              <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                                   <div class="text-right">
+                                        <span class="text-xl font-bold text-gray-900">
+                                             Total: {{ getTotalAmount() | currency:'PEN':'symbol':'1.2-2' }}
+                                        </span>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                         <button type="button" (click)="goBack()"
+                              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                              Cancelar
+                         </button>
+                         <button type="submit" [disabled]="!isFormValid() || saving"
+                              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-md transition-colors duration-200">
+                              <span *ngIf="saving"
+                                   class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                              {{ saving ? 'Guardando...' : (isEditMode ? 'Actualizar Compra' : 'Crear Compra') }}
+                         </button>
+                    </div>
+               </form>
+          </div>
+     </div>
+</div>

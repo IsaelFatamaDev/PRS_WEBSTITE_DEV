@@ -1,0 +1,33 @@
+/* Estilos específicos para la lista de proveedores */
+.supplier-list {
+  /* Estilos personalizados si es necesario */
+}
+
+/* Animaciones para las filas de la tabla */
+tbody tr {
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Estilos para los modales */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 700px;
+  }
+}
+
+/* Modal responsive */
+@media (max-width: 640px) {
+  .modal-container {
+    margin: 10px;
+    width: calc(100% - 20px);
+  }
+}

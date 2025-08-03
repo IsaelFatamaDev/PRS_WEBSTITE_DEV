@@ -1,1 +1,213 @@
-<p>purchase-list works!</p>
+<div class="p-6 bg-gray-50 min-h-screen">
+     <!-- Header -->
+     <div class="mb-6">
+          <div class="flex justify-between items-center mb-4">
+               <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Gestión de Compras</h1>
+                    <p class="text-gray-600">Administra las compras de tu organización</p>
+               </div>
+               <button (click)="openCreateModal()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Nueva Compra
+               </button>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+               {{ error }}
+               <button (click)="error = null" class="float-right font-bold">&times;</button>
+          </div>
+
+          <!-- Filters -->
+          <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+               <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Search -->
+                    <div>
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                         <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()"
+                              placeholder="Código, proveedor o factura..."
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                         <select [(ngModel)]="selectedStatus" (change)="onStatusChange()"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              <option value="ALL">Todos los estados</option>
+                              <option value="PENDIENTE">Pendiente</option>
+                              <option value="APROBADO">Aprobado</option>
+                              <option value="RECHAZADO">Rechazado</option>
+                              <option value="EN_TRANSITO">En Tránsito</option>
+                              <option value="RECIBIDO">Recibido</option>
+                              <option value="COMPLETADO">Completado</option>
+                              <option value="PARCIAL">Parcial</option>
+                         </select>
+                    </div>
+
+                    <!-- Supplier Filter -->
+                    <div>
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                         <select [(ngModel)]="selectedSupplier" (change)="onSupplierChange()"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              <option value="ALL">Todos los proveedores</option>
+                              <option *ngFor="let supplier of suppliers" [value]="supplier.supplierId">
+                                   {{ supplier.supplierName }}
+                              </option>
+                         </select>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <div class="flex items-end">
+                         <button (click)="refresh()"
+                              class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
+                              Actualizar
+                         </button>
+                    </div>
+               </div>
+          </div>
+     </div>
+
+     <!-- Loading State -->
+     <div *ngIf="loading" class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+     </div>
+
+     <!-- Purchases Table -->
+     <div *ngIf="!loading" class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+               <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                         <tr>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Código</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Proveedor</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Fecha</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Solicitado por</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Monto Total</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Estado</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Factura</th>
+                              <th
+                                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                   Acciones</th>
+                         </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                         <tr *ngFor="let purchase of filteredPurchases" class="hover:bg-gray-50">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                   {{ purchase.purchaseCode }}
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                   {{ purchase.supplierName }}
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                   {{ purchase.purchaseDate | date:'dd/MM/yyyy' }}
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                   {{ getUserFullName(purchase.requestedByUserId) }}
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                   {{ purchase.totalAmount | currency:'PEN':'symbol':'1.2-2' }}
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                   <span [class]="getStatusBadgeClass(purchase.status)"
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                        {{ getStatusText(purchase.status) }}
+                                   </span>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                   {{ purchase.invoiceNumber || '-' }}
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                   <div class="flex space-x-2">
+                                        <button (click)="openDetailModal(purchase)"
+                                             class="text-blue-600 hover:text-blue-900 transition-colors duration-200"
+                                             title="Ver detalles">
+                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                       d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                  </path>
+                                             </svg>
+                                        </button>
+                                        <button (click)="openEditModal(purchase)"
+                                             class="text-indigo-600 hover:text-indigo-900 transition-colors duration-200"
+                                             title="Editar">
+                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                  </path>
+                                             </svg>
+                                        </button>
+                                        <button (click)="openDeleteModal(purchase)"
+                                             [disabled]="!canDeletePurchase(purchase)" [class]="canDeletePurchase(purchase)
+                                                  ? 'text-red-600 hover:text-red-900 transition-colors duration-200'
+                                                  : 'text-gray-400 cursor-not-allowed'"
+                                             [title]="canDeletePurchase(purchase) ? 'Eliminar' : 'No se puede eliminar en este estado'">
+                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                  </path>
+                                             </svg>
+                                        </button>
+
+                                        <!-- Status Change Dropdown -->
+                                        <div class="relative group">
+                                             <button
+                                                  class="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                                                  title="Cambiar estado">
+                                                  <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                       viewBox="0 0 24 24">
+                                                       <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+                                                  </svg>
+                                             </button>
+                                             <div
+                                                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block">
+                                                  <div class="py-1">
+                                                       <button
+                                                            *ngFor="let status of [PurchaseStatus.PENDIENTE, PurchaseStatus.APROBADO, PurchaseStatus.RECHAZADO, PurchaseStatus.EN_TRANSITO, PurchaseStatus.RECIBIDO, PurchaseStatus.CANCELADO, PurchaseStatus.COMPLETADO, PurchaseStatus.PARCIAL]"
+                                                            (click)="updatePurchaseStatus(purchase, status)"
+                                                            [disabled]="purchase.status === status"
+                                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                            {{ getStatusText(status) }}
+                                                       </button>
+                                                  </div>
+                                             </div>
+                                        </div>
+                                   </div>
+                              </td>
+                         </tr>
+                    </tbody>
+               </table>
+
+               <!-- Empty State -->
+               <div *ngIf="filteredPurchases.length === 0" class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No hay compras</h3>
+                    <p class="mt-1 text-sm text-gray-500">Comienza creando tu primera compra.</p>
+               </div>
+          </div>
+     </div>
+</div>

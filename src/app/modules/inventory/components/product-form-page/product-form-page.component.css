@@ -1,0 +1,164 @@
+/* Estilos específicos para el formulario de productos */
+
+.product-form-container {
+  @apply min-h-screen bg-gray-50;
+}
+
+.form-card {
+  @apply bg-white shadow-lg rounded-lg overflow-hidden;
+}
+
+.form-header {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6;
+}
+
+.form-section {
+  @apply mb-8 pb-6 border-b border-gray-200 last:border-b-0;
+}
+
+.form-section:last-child {
+  @apply border-b-0 mb-0;
+}
+
+.section-title {
+  @apply text-lg font-semibold text-gray-900 mb-4 flex items-center;
+}
+
+.section-title::before {
+  content: "";
+  @apply w-1 h-6 bg-blue-600 rounded-full mr-3;
+}
+
+.input-group {
+  @apply space-y-1;
+}
+
+.input-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
+}
+
+.input-field:focus {
+  @apply ring-2 ring-blue-500 border-blue-500;
+}
+
+.input-field.error {
+  @apply border-red-300 bg-red-50 focus:ring-red-500 focus:border-red-500;
+}
+
+.input-field.readonly {
+  @apply bg-gray-50 cursor-not-allowed;
+}
+
+.error-message {
+  @apply text-xs text-red-500 mt-1;
+}
+
+.success-message {
+  @apply text-xs text-green-500 mt-1;
+}
+
+.info-banner {
+  @apply bg-blue-50 border-l-4 border-blue-400 p-4 mb-6;
+}
+
+.warning-banner {
+  @apply bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6;
+}
+
+.error-banner {
+  @apply bg-red-50 border-l-4 border-red-400 p-4 mb-6;
+}
+
+.loading-spinner {
+  @apply inline-block animate-spin rounded-full border-b-2;
+}
+
+.btn-primary {
+  @apply px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-md transition-colors duration-200 font-medium;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 font-medium;
+}
+
+.btn-danger {
+  @apply px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-md transition-colors duration-200 font-medium;
+}
+
+/* Grid responsivo */
+@media (max-width: 768px) {
+  .form-grid {
+    @apply grid-cols-1;
+  }
+
+  .form-actions {
+    @apply flex-col space-y-3 space-x-0;
+  }
+}
+
+/* Animaciones */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estados de validación mejorados */
+.input-field.valid {
+  @apply border-green-300 bg-green-50;
+}
+
+.input-field.invalid {
+  @apply border-red-300 bg-red-50;
+}
+
+/* Mejoras visuales para select */
+.select-field {
+  @apply appearance-none bg-white;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* Estilos para input numérico */
+.input-number {
+  @apply text-right;
+}
+
+.currency-input {
+  @apply pl-8;
+}
+
+.currency-symbol {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium;
+}

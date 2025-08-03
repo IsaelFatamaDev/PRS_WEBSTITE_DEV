@@ -78,6 +78,14 @@ export class OrganizationContextService {
      }
 
      /**
+      * Obtener el ID del usuario actual desde el AuthService
+      */
+     getCurrentUserId(): string | null {
+          const user = this.authService.getCurrentUser();
+          return user?.id || null;
+     }
+
+     /**
       * Verificar si hay un contexto de organización activo
       */
      hasOrganizationContext(): boolean {

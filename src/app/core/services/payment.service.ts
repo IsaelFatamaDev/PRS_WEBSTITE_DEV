@@ -13,9 +13,9 @@ interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class PaymentService {
-  private apiUrl = 'http://localhost:8083/api/v1/payments';
-  private userApiUrl = 'https://vg-ms-users-authentication-production.up.railway.app/api/v1/users/all';
-  private organizationApiUrl = 'https://vg-ms-organizations-production.up.railway.app/api/organizations';
+  private apiUrl = 'https://lab.vallegrande.edu.pe/jass/ms-payments/api/v1/payments';
+  private userApiUrl = 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1/users/all';
+  private organizationApiUrl = 'https://lab.vallegrande.edu.pe/jass/ms-organizations/api/organizations';
 
   constructor(private http: HttpClient) {}
 

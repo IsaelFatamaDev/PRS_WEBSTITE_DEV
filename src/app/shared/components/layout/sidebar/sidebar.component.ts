@@ -16,7 +16,7 @@ export class SidebarComponent implements OnInit {
   @Input() isSidebarOpen: boolean = true;
   @Input() windowWidth: number = 0;
   @Output() toggleSidebarEvent = new EventEmitter<void>();
-  @Output() optionSelected = new EventEmitter<void>(); 
+  @Output() optionSelected = new EventEmitter<void>();
   userRole: RolesUsers[] = [];
   RolesUsers = RolesUsers;
   isWaterQualityDropdownOpen: boolean = false;
@@ -24,7 +24,8 @@ export class SidebarComponent implements OnInit {
   isDistributionMenuOpen: boolean = false;
   isComplaintsIncidentsDropdownOpen: boolean = false;
   isInfrastructureDropdownOpen: boolean = false;
-  
+  isInventoryDropdownOpen: boolean = false;
+
   constructor(
     public authService: AuthService,
     private animationService: AnimationService,
@@ -50,9 +51,9 @@ export class SidebarComponent implements OnInit {
 
 
 
-toggleDistributionMenu(): void {
-  this.isDistributionMenuOpen = !this.isDistributionMenuOpen;
-}
+  toggleDistributionMenu(): void {
+    this.isDistributionMenuOpen = !this.isDistributionMenuOpen;
+  }
 
   toggleInfrastructureDropdown(): void {
     this.isInfrastructureDropdownOpen = !this.isInfrastructureDropdownOpen;
@@ -91,6 +92,10 @@ toggleDistributionMenu(): void {
 
   toggleComplaintsIncidentsDropdown(): void {
     this.isComplaintsIncidentsDropdownOpen = !this.isComplaintsIncidentsDropdownOpen;
+  }
+
+  toggleInventoryDropdown(): void {
+    this.isInventoryDropdownOpen = !this.isInventoryDropdownOpen;
   }
 
   hasRole(role: RolesUsers): boolean {

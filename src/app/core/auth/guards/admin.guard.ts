@@ -7,7 +7,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  console.log('AdminGuard: Checking authentication...');
+  console.log('AdminGuard: Checking authentication for route:', state.url);
 
   if (!authService.isAuthenticated()) {
     console.log('AdminGuard: Not authenticated, redirecting to login');
@@ -31,6 +31,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
     router.navigate(['/unauthorized']);
     return false;
   }
+
   console.log('AdminGuard: Getting organization ID...');
   const organizationId = authService.getCurrentOrganizationId();
   console.log('AdminGuard: Organization ID is:', organizationId);
@@ -42,6 +43,12 @@ export const adminGuard: CanActivateFn = (route, state) => {
   //   return false;
   // }
 
-  console.log('AdminGuard: All checks passed, allowing access');
+  console.log('AdminGuard: All checks passed, allowing access to:', state.url);
+
+  // Agregar un pequeño delay para evitar problemas de timing
+  setTimeout(() => {
+    console.log('AdminGuard: Route should be accessible now');
+  }, 100);
+
   return true;
 };

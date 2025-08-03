@@ -1,0 +1,176 @@
+/* Estilos personalizados para el componente de compras */
+
+/* Dropdown hover effect */
+.group:hover .group-hover\:block {
+  display: block !important;
+}
+
+/* Custom scrollbar for modals */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Modal backdrop animation */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Table hover effects */
+.table-row-hover:hover {
+  background-color: #f8fafc;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Form input focus states */
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+/* Status badge animations */
+.status-badge {
+  @apply px-2 py-1 text-xs font-semibold rounded-full transition-all duration-200;
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+}
+
+.tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+/* Purchase detail item styling */
+.purchase-detail-item {
+  @apply border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200;
+}
+
+/* Total amount highlight */
+.total-amount {
+  @apply text-lg font-bold text-green-600 bg-green-50 px-4 py-2 rounded-lg;
+}
+
+/* Action buttons container */
+.action-buttons {
+  @apply flex items-center space-x-2;
+}
+
+.action-button {
+  @apply p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100;
+}
+
+/* Modal animations */
+.modal-enter {
+  animation: modalEnter 0.3s ease-out;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Search and filter section */
+.filter-section {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-200;
+}
+
+/* Empty state styling */
+.empty-state {
+  @apply text-center py-12 bg-gray-50 rounded-lg;
+}
+
+.empty-state-icon {
+  @apply mx-auto h-12 w-12 text-gray-400 mb-4;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-container {
+    @apply w-full m-4;
+  }
+
+  .table-container {
+    @apply overflow-x-auto;
+  }
+
+  .filter-grid {
+    @apply grid-cols-1 gap-2;
+  }
+
+  .action-buttons {
+    @apply flex-col space-x-0 space-y-1;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .purchase-table {
+    @apply text-xs;
+  }
+}
