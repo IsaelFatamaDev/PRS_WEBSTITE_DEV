@@ -16,7 +16,7 @@ RUN npm ci
 COPY . .
 
 # Construir la aplicación para producción con base href configurado y sin console.log
-RUN npm run build:prod -- --base-href=/jass/vg-frontend/
+RUN npm run build:prod
 
 # Etapa 2: Servir la aplicación con Nginx
 FROM nginx:alpine AS production
