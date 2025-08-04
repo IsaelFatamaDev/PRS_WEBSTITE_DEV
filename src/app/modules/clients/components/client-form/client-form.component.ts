@@ -4,6 +4,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../../../core/services/user.service';
+import { OrganizationResolverService, OrganizationData, ZoneData, StreetData } from '../../../../core/services/organization-resolver.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import {
@@ -34,6 +35,11 @@ export class ClientFormComponent implements OnInit, OnDestroy {
 
   DocumentType = DocumentType;
 
+  // Datos para los selectores
+  organizations: OrganizationData[] = [];
+  zones: ZoneData[] = [];
+  streets: StreetData[] = [];
+
   errors: any = {};
 
   passwordStrength = {
@@ -47,6 +53,7 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
+    private organizationResolver: OrganizationResolverService,
     private authService: AuthService,
     private notificationService: NotificationService
   ) {
@@ -55,6 +62,7 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     this.isEditMode = !!this.clientId;
 
     this.initializeForm();
+    this.loadOrganizationData();
     this.isFormInitialized = true;
 
     if (this.isEditMode && this.clientId) {
@@ -65,6 +73,51 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Cargar datos de organizaciones, zonas y calles
+   */
+  private loadOrganizationData(): void {
+    // Cargar organizaciones
+    console.log('🔄 Cargando organizaciones...');
+    this.organizationResolver.getAllOrganizations().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (organizations) => {
+        console.log('✅ Organizaciones cargadas:', organizations);
+        this.organizations = organizations;
+      },
+      error: (error) => {
+        console.error('❌ Error loading organizations:', error);
+      }
+    });
+
+    // Cargar todas las zonas
+    console.log('🔄 Cargando zonas...');
+    this.organizationResolver.getAllZones().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (zones) => {
+        console.log('✅ Zonas cargadas:', zones);
+        this.zones = zones;
+      },
+      error: (error) => {
+        console.error('❌ Error loading zones:', error);
+      }
+    });
+
+    // Cargar todas las calles
+    this.organizationResolver.getAllStreets().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (streets) => {
+        this.streets = streets;
+      },
+      error: (error) => {
+        console.error('Error loading streets:', error);
+      }
+    });
   }
   /**
    * Inicializar formulario
@@ -79,6 +132,7 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       email: ['', [Validators.required, Validators.email, this.emailValidator]],
       phone: ['', [Validators.required, this.phoneValidator]],
 
+      organizationId: ['', Validators.required],
       streetAddress: ['', [Validators.required, Validators.maxLength(200)]],
       streetId: ['', Validators.required],
       zoneId: ['', Validators.required],
@@ -87,6 +141,17 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       password: ['', [Validators.required, this.passwordValidator]],
       confirmPassword: ['', Validators.required]
     });
+
+    // Inicializar controles disabled - solo organización bloqueada
+    this.clientForm.get('organizationId')?.disable();
+
+    // Preseleccionar la organización del usuario actual
+    const currentOrganizationId = this.authService.getCurrentOrganizationId();
+    if (currentOrganizationId) {
+      this.clientForm.patchValue({
+        organizationId: currentOrganizationId
+      });
+    }
 
     if (this.isEditMode) {
       this.clientForm.removeControl('password');
@@ -287,6 +352,7 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       documentNumber: client.documentNumber,
       email: client.email,
       phone: client.phone,
+      organizationId: client.organizationId,
       streetAddress: client.streetAddress,
       streetId: client.streetId,
       zoneId: client.zoneId,
@@ -329,8 +395,11 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   private createClient(): void {
     const formValue = this.clientForm.value;
 
+    // Obtener organizationId del control deshabilitado
+    const organizationId = this.clientForm.get('organizationId')?.value || this.getCurrentOrganizationId();
+
     const clientData: UserCreateDTO = {
-      organizationId: this.getCurrentOrganizationId(),
+      organizationId: organizationId,
       documentType: formValue.documentType,
       documentNumber: formValue.documentNumber,
       firstName: formValue.firstName,
@@ -370,8 +439,13 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   private updateClient(): void {
     if (!this.clientId) return;
 
-    const formValue = this.clientForm.value; const updateData: UserUpdateDTO = {
-      organizationId: this.getCurrentOrganizationId(),
+    const formValue = this.clientForm.value;
+
+    // Obtener organizationId del control deshabilitado
+    const organizationId = this.clientForm.get('organizationId')?.value || this.getCurrentOrganizationId();
+
+    const updateData: UserUpdateDTO = {
+      organizationId: organizationId,
       documentType: formValue.documentType,
       documentNumber: formValue.documentNumber,
       firstName: formValue.firstName,

@@ -7,7 +7,7 @@ import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ModalService } from '../../../../core/services/modal.service';
-import { UserResponseDTO, UserFilterDTO, DocumentType, StatusUsers, RolesUsers } from '../../../../core/models/user.model';
+import { UserResponseDTO, UserWithLocationNames, UserFilterDTO, DocumentType, StatusUsers, RolesUsers } from '../../../../core/models/user.model';
 
 @Component({
   selector: 'app-client-list',
@@ -20,8 +20,8 @@ export class ClientListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
 
-  clients: UserResponseDTO[] = [];
-  filteredClients: UserResponseDTO[] = [];
+  clients: UserWithLocationNames[] = [];
+  filteredClients: UserWithLocationNames[] = [];
   isLoading = false;
   error: string | null = null;
   searchTerm = '';

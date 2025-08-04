@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { OrganizationContextService } from '../../../core/services/organization-context.service';
+import { OrganizationResolverService } from '../../../core/services/organization-resolver.service';
 import { AuthUser } from '../../../core/models/auth.model';
 import { UserResponseDTO, StatusUsers, RolesUsers } from '../../../core/models/user.model';
 
@@ -17,6 +18,7 @@ import { UserResponseDTO, StatusUsers, RolesUsers } from '../../../core/models/u
 export class DashboardComponent implements OnInit, OnDestroy {
   currentUser: AuthUser | null = null;
   organizationInfo: any = null;
+  organizationName: string = '';
   userStats: {
     total: number;
     active: number;
@@ -35,7 +37,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private userService: UserService,
-    private organizationContextService: OrganizationContextService
+    private organizationContextService: OrganizationContextService,
+    private organizationResolver: OrganizationResolverService
   ) { }
 
   ngOnInit(): void {
@@ -72,7 +75,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
+    // Cargar nombre de la organización
+    this.loadOrganizationName();
     this.loadUserStats();
+  }
+
+  private loadOrganizationName(): void {
+    if (!this.currentUser?.organizationId) return;
+
+    this.subscriptions.add(
+      this.organizationResolver.getAllOrganizations().subscribe({
+        next: (organizations) => {
+          const currentOrg = organizations.find(org => org.organizationId === this.currentUser?.organizationId);
+          this.organizationName = currentOrg?.organizationName || this.currentUser?.organizationId || 'Organización no encontrada';
+        },
+        error: (error) => {
+          console.error('Error loading organization name:', error);
+          this.organizationName = this.currentUser?.organizationId || 'Error al cargar';
+        }
+      })
+    );
   }
 
   private loadUserStats(): void {

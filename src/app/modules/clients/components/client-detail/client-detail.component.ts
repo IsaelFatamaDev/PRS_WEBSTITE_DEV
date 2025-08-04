@@ -5,7 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../../../core/services/user.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ModalService } from '../../../../core/services/modal.service';
-import { UserResponseDTO, DocumentType, StatusUsers } from '../../../../core/models/user.model';
+import { UserResponseDTO, UserWithLocationNames, DocumentType, StatusUsers } from '../../../../core/models/user.model';
 
 @Component({
   selector: 'app-client-detail',
@@ -17,12 +17,13 @@ import { UserResponseDTO, DocumentType, StatusUsers } from '../../../../core/mod
 export class ClientDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  client: UserResponseDTO | null = null;
+  client: UserWithLocationNames | null = null;
   isLoading = false;
   clientId: string | null = null;
 
   StatusUsers = StatusUsers;
   DocumentType = DocumentType;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -50,19 +51,22 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   private loadClient(clientId: string): void {
     this.isLoading = true;
 
-    this.userService.getUserById(clientId).pipe(
+    this.userService.getUserByIdWithLocationNames(clientId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (client) => {
         this.client = client;
         this.isLoading = false;
-      }, error: (error) => {
+      },
+      error: (error) => {
         console.error('Error loading client:', error);
         this.isLoading = false;
         this.router.navigate(['/admin/users']);
       }
     });
-  }  /**
+  }
+
+  /**
    * Volver a la lista
    */
   goBack(): void {

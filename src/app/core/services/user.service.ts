@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
+import { OrganizationResolverService } from './organization-resolver.service';
 import {
      UserResponseDTO,
      UserCreateDTO,
      UserUpdateDTO,
      UserFilterDTO,
      UserListResponse,
+     UserWithLocationNames,
      RolesUsers,
      StatusUsers
 } from '../models/user.model';
@@ -21,7 +23,8 @@ export class UserService {
 
      constructor(
           private apiService: ApiService,
-          private authService: AuthService
+          private authService: AuthService,
+          private organizationResolver: OrganizationResolverService
      ) { }
 
      /**
@@ -48,6 +51,58 @@ export class UserService {
       */
      getUserById(userId: string): Observable<UserResponseDTO> {
           return this.apiService.get<UserResponseDTO>(`/users/${userId}`);
+     }
+
+     /**
+      * Obtener usuario por ID con nombres de ubicación resueltos
+      */
+     getUserByIdWithLocationNames(userId: string): Observable<UserWithLocationNames> {
+          return this.getUserById(userId).pipe(
+               switchMap((user: UserResponseDTO) => {
+                    return this.organizationResolver.resolveUserLocationData(
+                         user.organizationId,
+                         user.zoneId,
+                         user.streetId
+                    ).pipe(
+                         map(resolvedData => ({
+                              ...user,
+                              organizationName: resolvedData.organizationName,
+                              zoneName: resolvedData.zoneName,
+                              streetName: resolvedData.streetName
+                         } as UserWithLocationNames))
+                    );
+               })
+          );
+     }
+
+     /**
+      * Obtener todos los usuarios de la organización con nombres resueltos
+      */
+     getAllUsersWithLocationNames(): Observable<UserWithLocationNames[]> {
+          return this.getAllUsers().pipe(
+               switchMap((users: UserResponseDTO[]) => {
+                    if (users.length === 0) {
+                         return of([]);
+                    }
+
+                    const userObservables = users.map(user =>
+                         this.organizationResolver.resolveUserLocationData(
+                              user.organizationId,
+                              user.zoneId,
+                              user.streetId
+                         ).pipe(
+                              map(resolvedData => ({
+                                   ...user,
+                                   organizationName: resolvedData.organizationName,
+                                   zoneName: resolvedData.zoneName,
+                                   streetName: resolvedData.streetName
+                              } as UserWithLocationNames))
+                         )
+                    );
+
+                    return forkJoin(userObservables);
+               })
+          );
      }     /**
       * Obtener usuario por email (filtrado local)
       */

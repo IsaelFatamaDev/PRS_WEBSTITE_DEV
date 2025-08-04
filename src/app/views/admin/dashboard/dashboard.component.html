@@ -19,7 +19,7 @@
             <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ currentUser.fullName }}</p>
             <p class="text-xs text-gray-500 dark:text-slate-400">{{ currentUser.userCode }}</p>
             <p class="text-xs text-blue-600 dark:text-blue-400">
-              Org: {{ currentUser.organizationId }}
+              Org: {{ organizationName || currentUser.organizationId }}
             </p>
           </div>
         </div>
@@ -112,8 +112,9 @@
     <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Contexto de la Organización</h2>
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div class="p-4 rounded-lg bg-gray-50 dark:bg-slate-700">
-        <p class="text-sm font-medium text-gray-600 dark:text-slate-400">ID de Organización</p>
-        <p class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ organizationInfo.organizationId }}</p>
+        <p class="text-sm font-medium text-gray-600 dark:text-slate-400">Organización</p>
+        <p class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ organizationName ||
+          organizationInfo.organizationId }}</p>
       </div>
       <div class="p-4 rounded-lg bg-gray-50 dark:bg-slate-700">
         <p class="text-sm font-medium text-gray-600 dark:text-slate-400">Usuario Actual</p>
@@ -151,7 +152,7 @@
         <p class="mt-2 text-blue-700 dark:text-blue-300">
           Desde este panel puedes gestionar todos los aspectos de tu organización: usuarios, cajas de agua,
           pagos, quejas, distribución y calidad del agua. Todas las operaciones se realizan en el contexto
-          de tu organización (ID: <strong>{{ currentUser?.organizationId }}</strong>).
+          de tu organización: <strong>{{ organizationName || currentUser?.organizationId }}</strong>.
         </p>
       </div>
     </div>

@@ -9,14 +9,14 @@ WORKDIR /app
 # Copiar archivos de configuración de dependencias
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar todas las dependencias (incluyendo devDependencies para el build)
+RUN npm ci
 
 # Copiar código fuente
 COPY . .
 
-# Construir la aplicación para producción
-RUN npm run build --prod
+# Construir la aplicación para producción con base href configurado y sin console.log
+RUN npm run build:prod -- --base-href=/jass/vg-frontend/
 
 # Etapa 2: Servir la aplicación con Nginx
 FROM nginx:alpine AS production
@@ -25,7 +25,7 @@ FROM nginx:alpine AS production
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copiar los archivos construidos desde la etapa anterior
-COPY --from=build /app/dist/sistema-jass /usr/share/nginx/html
+COPY --from=build /app/dist/sistema-jass/browser /usr/share/nginx/html
 
 # Exponer el puerto 80
 EXPOSE 80

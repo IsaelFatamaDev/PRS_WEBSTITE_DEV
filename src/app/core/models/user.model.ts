@@ -150,3 +150,9 @@ export interface UserListResponse {
      limit: number;
      totalPages: number;
 }
+
+export interface UserWithLocationNames extends UserResponseDTO {
+     organizationName?: string;
+     zoneName?: string;
+     streetName?: string;
+}

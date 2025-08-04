@@ -153,18 +153,29 @@
 
                                    <div>
                                         <label
-                                             class="block mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">ID
-                                             de Calle</label>
-                                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ client.streetId ||
-                                             'No especificado' }}</p>
+                                             class="block mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">Organización</label>
+                                        <p class="font-medium text-gray-900 dark:text-gray-100">
+                                             {{ client.organizationName || 'Cargando...' }}
+
+                                        </p>
                                    </div>
 
                                    <div>
                                         <label
-                                             class="block mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">ID
-                                             de Zona</label>
-                                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ client.zoneId || 'No
-                                             especificado' }}</p>
+                                             class="block mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">Zona</label>
+                                        <p class="font-medium text-gray-900 dark:text-gray-100">
+                                             {{ client.zoneName || 'No especificada' }}
+
+                                        </p>
+                                   </div>
+
+                                   <div>
+                                        <label
+                                             class="block mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">Calle</label>
+                                        <p class="font-medium text-gray-900 dark:text-gray-100">
+                                             {{ client.streetName || 'No especificada' }}
+
+                                        </p>
                                    </div>
                               </div>
                          </div>

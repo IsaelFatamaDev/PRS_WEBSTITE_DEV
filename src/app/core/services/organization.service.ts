@@ -19,11 +19,18 @@ export class OrganizationService {
   constructor(private http: HttpClient) { }
 
   getAllOrganization() {
-    return this.http.get<organization[]>(this.apiUrl.organizations);
+    return this.http.get<ApiResponse<organization[]>>(this.apiUrl.organizations).pipe(
+      map(response => {
+        console.log('🔍 Respuesta organizations API:', response);
+        return response.data || [];
+      })
+    );
   }
 
   getOrganizationById(id: string) {
-    return this.http.get<organization>(`${this.apiUrl.organizations}/${id}`);
+    return this.http.get<ApiResponse<organization>>(`${this.apiUrl.organizations}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
 
@@ -52,14 +59,21 @@ export class OrganizationService {
     );
   }
 
-  // Metode zones 
+  // Metode zones
 
   getAllZones() {
-    return this.http.get<zones[]>(this.apiUrl.zonas);
+    return this.http.get<ApiResponse<zones[]>>(this.apiUrl.zonas).pipe(
+      map(response => {
+        console.log('🔍 Respuesta zones API:', response);
+        return response.data || [];
+      })
+    );
   }
 
   getZoneById(id: string) {
-    return this.http.get<zones>(`${this.apiUrl.zonas}/${id}`);
+    return this.http.get<ApiResponse<zones>>(`${this.apiUrl.zonas}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
   createZones(zone: zonesCreate): Observable<zones> {
@@ -88,11 +102,18 @@ export class OrganizationService {
 
   // Metode Street
   getAllStreet() {
-    return this.http.get<street[]>(this.apiUrl.street);
+    return this.http.get<ApiResponse<street[]>>(this.apiUrl.street).pipe(
+      map(response => {
+        console.log('🔍 Respuesta streets API:', response);
+        return response.data || [];
+      })
+    );
   }
 
   getStreetById(id: string) {
-    return this.http.get<street>(`${this.apiUrl.street}/${id}`);
+    return this.http.get<ApiResponse<street>>(`${this.apiUrl.street}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
   createStreet(streetData: streetCreate): Observable<street> {

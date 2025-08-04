@@ -1,11 +1,14 @@
 export const environment = {
      production: true,
-     apiUrl: 'https://vg-ms-users-authentication-production.up.railway.app/api/v1',
-     organizations: 'https://vg-ms-organizations-production.up.railway.app/api/organizations',
+     enableConsoleLog: false,
+     apiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1',
+     complaintsIncidentsApiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-claim-incidents/api/v1',
+     organizations: 'https://lab.vallegrande.edu.pe/jass/ms-organization/api/organizations',
      testingPoint: 'https://lab.vallegrande.edu.pe/jass/ms-water-quality/api/v2/testingpoints',
      dailyRecords: 'https://lab.vallegrande.edu.pe/jass/ms-water-quality/api/v2/dailyrecords',
-     zonas: 'https://vg-ms-organizations-production.up.railway.app/api/zones',
-     street: 'https://vg-ms-organizations-production.up.railway.app/api/streets',
+     zonas: 'https://lab.vallegrande.edu.pe/jass/ms-organization/api/zones',
+     street: 'https://lab.vallegrande.edu.pe/jass/ms-organization/api/streets',
      qualityTest: 'https://lab.vallegrande.edu.pe/jass/ms-water-quality/api/v2/qualitytests',
-     users: 'https://vg-ms-users-authentication-production.up.railway.app/api/v1/users/all'
+     incidents: 'https://lab.vallegrande.edu.pe/jass/ms-claim-incidents/api/v1',
+     inventoryApiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-inventory/api/v1/'
 };

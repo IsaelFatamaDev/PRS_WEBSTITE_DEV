@@ -1,5 +1,6 @@
 export const environment = {
      production: false,
+     enableConsoleLog: true,
      apiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1',
      complaintsIncidentsApiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-claim-incidents/api/v1',
      organizations: 'https://lab.vallegrande.edu.pe/jass/ms-organization/api/organizations',
