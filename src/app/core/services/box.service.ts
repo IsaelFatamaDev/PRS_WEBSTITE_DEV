@@ -3,14 +3,15 @@ import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { WaterBox, WaterBoxAssignment, WaterBoxTransfer } from '../models/box.model';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoxService {
-  private waterBoxBaseUrl = 'https://vg-ms-infrastructure-production.up.railway.app/api/v1/water-boxes';
-  private waterBoxAssignmentBaseUrl = 'https://vg-ms-infrastructure-production.up.railway.app/api/v1/water-box-assignments';
-  private waterBoxTransferBaseUrl = 'https://vg-ms-infrastructure-production.up.railway.app/api/v1/water-box-transfers';
+private waterBoxBaseUrl = `${environment.infrastructureApiUrl}/water-boxes`;
+private waterBoxAssignmentBaseUrl = `${environment.infrastructureApiUrl}/water-box-assignments`;
+private waterBoxTransferBaseUrl = `${environment.infrastructureApiUrl}/water-box-transfers`;
 
   constructor(private api: ApiService) { }
 
