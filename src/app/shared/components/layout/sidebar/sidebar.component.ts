@@ -151,6 +151,7 @@ export class SidebarComponent implements OnInit {
       [RolesUsers.CLIENT]: 'Cliente'
     };
 
+
     if (user.roles.includes(RolesUsers.SUPER_ADMIN)) {
       return roleDisplayMap[RolesUsers.SUPER_ADMIN];
     } else if (user.roles.includes(RolesUsers.ADMIN)) {
@@ -163,6 +164,22 @@ export class SidebarComponent implements OnInit {
   }
 
   getDashboardRoute(): string {
+    // Primero verificar el rol activo
+    const activeRole = this.authService.getActiveRole();
+    if (activeRole) {
+      switch (activeRole) {
+        case RolesUsers.SUPER_ADMIN:
+          return '/super-admin/dashboard';
+        case RolesUsers.ADMIN:
+          return '/admin/dashboard';
+        case RolesUsers.CLIENT:
+          return '/client/dashboard';
+        default:
+          break;
+      }
+    }
+
+    // Fallback a la lógica anterior si no hay rol activo
     const user = this.authService.getCurrentUser();
     if (!user?.roles || user.roles.length === 0) return '/';
 

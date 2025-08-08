@@ -95,6 +95,22 @@ export class RoleSelectorComponent implements OnInit {
      }
 
      private getDashboardRoute(): string {
+          // Primero verificar el rol activo
+          const activeRole = this.authService.getActiveRole();
+          if (activeRole) {
+               switch (activeRole) {
+                    case RolesUsers.SUPER_ADMIN:
+                         return '/super-admin/dashboard';
+                    case RolesUsers.ADMIN:
+                         return '/admin/dashboard';
+                    case RolesUsers.CLIENT:
+                         return '/client/dashboard';
+                    default:
+                         break;
+               }
+          }
+
+          // Fallback a la lógica anterior si no hay rol activo
           if (!this.user?.roles || this.user.roles.length === 0) return '/';
 
           if (this.user.roles.includes(RolesUsers.SUPER_ADMIN)) {
