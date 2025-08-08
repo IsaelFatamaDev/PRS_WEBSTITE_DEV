@@ -11,4 +11,6 @@ export const environment = {
      qualityTest: 'https://lab.vallegrande.edu.pe/jass/ms-water-quality/api/v2/qualitytests',
      users: 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1/api/v1/users/all',
      incidents: 'https://vg-ms-claims-production.up.railway.app/api/v1',
+     inventoryApiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-inventory/api/v1/',
+     infrastructureApiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-infrastructure/api/v1/',
 };

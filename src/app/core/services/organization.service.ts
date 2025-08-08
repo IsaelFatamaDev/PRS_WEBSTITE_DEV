@@ -20,14 +20,7 @@ export class OrganizationService {
 
   getAllOrganization() {
     return this.http.get<ApiResponse<organization[]>>(this.apiUrl.organizations).pipe(
-<<<<<<< HEAD
-      map(response => {
-        console.log('🔍 Respuesta organizations API:', response);
-        return response.data || [];
-      })
-=======
       map(response => response.data)
->>>>>>> d210d18 (Actualización ms-distribucion-agua)
     );
   }
 
@@ -67,14 +60,7 @@ export class OrganizationService {
 
   getAllZones() {
     return this.http.get<ApiResponse<zones[]>>(this.apiUrl.zonas).pipe(
-<<<<<<< HEAD
-      map(response => {
-        console.log('🔍 Respuesta zones API:', response);
-        return response.data || [];
-      })
-=======
       map(response => response.data)
->>>>>>> d210d18 (Actualización ms-distribucion-agua)
     );
   }
 
