@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
 import { DistributionProgram } from '../../../../core/models/water-distribution.model';
 import { DistributionService } from '../../../../core/services/distribution.service';
-import { User, UserResponseDTO } from '../../../../core/models/user.model';
+import { ProgramsService } from '../../../../core/services/water-distribution.service';
+import { UserResponseDTO } from '../../../../core/models/user.model';
 import { UserService } from '../../../../core/services/user.service';
 import { organization } from '../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../core/services/organization.service';
-import { FormsModule } from '@angular/forms';
-import { ProgramsService } from '../../../../core/services/water-distribution.service';
 import { routes, schedules } from '../../../../core/models/distribution.model';
 
 @Component({
@@ -17,14 +18,21 @@ import { routes, schedules } from '../../../../core/models/distribution.model';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-
 export class ProgramListComponent implements OnInit {
   programs: DistributionProgram[] = [];
   filteredPrograms: DistributionProgram[] = [];
+
   routes: routes[] = [];
   schedules: schedules[] = [];
   users: UserResponseDTO[] = [];
   organization: organization[] = [];
+
+  // Mapas para búsquedas rápidas
+  private organizationMap = new Map<string, string>();
+  private routeMap = new Map<string, string>();
+  private scheduleMap = new Map<string, string>();
+  private userMap = new Map<string, string>();
+
   loading = false;
   showAlert = false;
   alertType: 'success' | 'error' | 'info' = 'info';
@@ -35,17 +43,17 @@ export class ProgramListComponent implements OnInit {
   constructor(
     private programsService: ProgramsService,
     private distributionService: DistributionService,
-    private UserService: UserService,
-    private OrganizationService: OrganizationService,
+    private userService: UserService,
+    private organizationService: OrganizationService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadPrograms();
     this.loadRoutes();
     this.loadSchedules();
     this.loadUsers();
-    this. loadOrganizations();
+    this.loadOrganizations();
   }
 
   private loadPrograms(): void {
@@ -65,33 +73,49 @@ export class ProgramListComponent implements OnInit {
 
   private loadRoutes(): void {
     this.distributionService.getAllR().subscribe({
-      next: (data: routes[]) => this.routes = data,
+      next: (data: routes[]) => {
+        this.routes = data;
+        this.routeMap.clear();
+        data.forEach(r => this.routeMap.set(r.id, r.routeName));
+      },
       error: (error: any) => console.error('Error al cargar rutas:', error)
     });
   }
 
   private loadSchedules(): void {
     this.distributionService.getAll().subscribe({
-      next: (data: schedules[]) => this.schedules = data,
+      next: (data: schedules[]) => {
+        this.schedules = data;
+        this.scheduleMap.clear();
+        data.forEach(s => this.scheduleMap.set(s.id, s.scheduleName));
+      },
       error: (error: any) => console.error('Error al cargar horarios:', error)
     });
   }
 
-  private loadUsers(): void {
-    this.UserService.getAllUsers().subscribe({
-      next: (data: UserResponseDTO[]) => {
-        console.log('Usuarios cargados:', data); // <- Agrega esto
-        this.users = data;
-      },
-      error: (error: any) => console.error('Error al cargar usuarios:', error)
-    });
-  }
+private loadUsers(): void {
+  this.userService.getAllUsers().subscribe({
+    next: (data: UserResponseDTO[]) => {
+      console.log('Usuarios recibidos:', data); // Verifica estructura
+      this.users = data;
+      this.userMap.clear();
+
+      data.forEach(u => {
+        console.log('Mapeando usuario:', u.id, '->', u.fullName); // Asegúrate de usar 'id' si así viene del backend
+        this.userMap.set(u.id, u.fullName); // Mapear correctamente
+      });
+    },
+    error: (error: any) => console.error('Error al cargar usuarios:', error)
+  });
+}
+
 
   private loadOrganizations(): void {
-    this.OrganizationService.getAllOrganization().subscribe({
+    this.organizationService.getAllOrganization().subscribe({
       next: (data: organization[]) => {
-        console.log('Organizaciones cargados:', data); // <- Agrega esto
         this.organization = data;
+        this.organizationMap.clear();
+        data.forEach(o => this.organizationMap.set(o.organizationId, o.organizationName));
       },
       error: (error: any) => console.error('Error al cargar organizaciones:', error)
     });
@@ -121,19 +145,31 @@ export class ProgramListComponent implements OnInit {
     return this.programs.filter(p => p.status === 'COMPLETED').length;
   }
 
-  getResponsibleName(responsibleUserId: string): string {
-  const user = this.users.find(u => u.fullName === responsibleUserId);
-  return user ? user.fullName : responsibleUserId;
-}
-
-
-
   getWarningProgramsCount(): number {
     return this.programs.filter(p => p.status === 'IN_PROGRESS').length;
   }
 
   getCriticalProgramsCount(): number {
     return this.programs.filter(p => p.status === 'CANCELLED').length;
+  }
+
+getResponsibleName(responsibleUserId: string): string {
+  const name = this.userMap.get(responsibleUserId);
+  console.log('Buscando responsable:', responsibleUserId, '=>', name);
+  return name || responsibleUserId;
+}
+
+
+  getOrganizationName(organizationId: string): string {
+    return this.organizationMap.get(organizationId) || organizationId;
+  }
+
+  getRouteName(routeId: string): string {
+    return this.routeMap.get(routeId) || routeId;
+  }
+
+  getScheduleName(scheduleId: string): string {
+    return this.scheduleMap.get(scheduleId) || scheduleId;
   }
 
   getStatusText(status: string): string {
@@ -156,38 +192,21 @@ export class ProgramListComponent implements OnInit {
     }
   }
 
-viewProgramsDetail(id: string): void {
-  this.router.navigate(['/admin/distribution/programs/view', id]);
-}
-
+  viewProgramsDetail(id: string): void {
+    this.router.navigate(['/admin/distribution/programs/view', id]);
+  }
 
   updatePrograms(id: string): void {
-   this.router.navigate(['/admin/distribution/programs/edit', id]);
+    this.router.navigate(['/admin/distribution/programs/edit', id]);
   }
 
   addNewPrograms(): void {
-   this.router.navigate(['/admin/distribution/programs/new']);
+    this.router.navigate(['/admin/distribution/programs/new']);
   }
 
   trackByProgramsId(index: number, program: DistributionProgram): string {
     return program.id;
   }
-
-  getOrganizationName(organizationId: string): string {
-    const organization = this.organization.find(o => o.organizationId === organizationId);
-    return organization ? organization.organizationName : organizationId;
-  }
-
-  getRouteName(routeId: string): string {
-    const route = this.routes.find(r => r.id === routeId);
-    return route ? route.routeName : routeId;
-  }
-
-  getScheduleName(scheduleId: string): string {
-    const schedule = this.schedules.find(s => s.id === scheduleId);
-    return schedule ? schedule.scheduleName : scheduleId;
-  }
-
 
   dismissAlert(): void {
     this.showAlert = false;

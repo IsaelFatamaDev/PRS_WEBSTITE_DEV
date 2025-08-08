@@ -3,21 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { DistributionProgram, DistributionProgramCreate, DistributionProgramUpdate } from '../models/water-distribution.model';
 import { ApiResponse } from '../models/auth.model';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgramsService {
 
-  private readonly apiPrograms = "https://vg-ms-distribution-production.up.railway.app/api/v2/programs"
+  private readonly apiPrograms = `${environment.distribution}/programs`;
 
   constructor(private http: HttpClient) { }
 
- // MÉTODOS DE PROGRAMS
+  // MÉTODOS DE PROGRAMS
 
   getAllPrograms(): Observable<DistributionProgram[]> {
     return this.http.get<ApiResponse<DistributionProgram[]>>(this.apiPrograms).pipe(
-      map((response: { data: any; }) => response.data)
+      map(response => response.data)
     );
   }
 
@@ -56,4 +57,5 @@ export class ProgramsService {
       map(response => response.data)
     );
   }
+
 }

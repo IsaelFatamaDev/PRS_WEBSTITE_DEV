@@ -20,10 +20,14 @@ export class OrganizationService {
 
   getAllOrganization() {
     return this.http.get<ApiResponse<organization[]>>(this.apiUrl.organizations).pipe(
+<<<<<<< HEAD
       map(response => {
         console.log('🔍 Respuesta organizations API:', response);
         return response.data || [];
       })
+=======
+      map(response => response.data)
+>>>>>>> d210d18 (Actualización ms-distribucion-agua)
     );
   }
 
@@ -48,13 +52,13 @@ export class OrganizationService {
 
 
   deleteOrganization(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/desactivate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/delete`, {}).pipe(
       map(response => response.data)
     );
   }
 
   restoreOrganization(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/activate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/restore`, {}).pipe(
       map(response => response.data)
     );
   }
@@ -63,10 +67,14 @@ export class OrganizationService {
 
   getAllZones() {
     return this.http.get<ApiResponse<zones[]>>(this.apiUrl.zonas).pipe(
+<<<<<<< HEAD
       map(response => {
         console.log('🔍 Respuesta zones API:', response);
         return response.data || [];
       })
+=======
+      map(response => response.data)
+>>>>>>> d210d18 (Actualización ms-distribucion-agua)
     );
   }
 
