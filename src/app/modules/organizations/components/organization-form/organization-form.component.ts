@@ -34,7 +34,6 @@ export class OrganizationFormComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.organizationForm = this.fb.group({
-      organizationCode:['',Validators.required],
       organizationName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
       legalRepresentative: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
       address: ['', Validators.required],

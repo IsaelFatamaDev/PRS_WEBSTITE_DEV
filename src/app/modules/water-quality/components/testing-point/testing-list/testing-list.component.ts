@@ -5,7 +5,9 @@ import { Router } from '@angular/router';
 import { WaterQualityService } from '../../../../../core/services/water-quality.service';
 import { testing_points, PointType, Status } from '../../../../../core/models/water-quality.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
-import { zones } from '../../../../../core/models/organization.model';
+import { OrganizationResolverService } from '../../../../../core/services/organization-resolver.service';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { zones, organization } from '../../../../../core/models/organization.model';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -24,16 +26,32 @@ export class TestingListComponent implements OnInit {
   alertType: 'success' | 'error' | 'info' = 'info';
   alertMessage = '';
   zones: zones[] = [];
+  organizations: organization[] = [];
+  currentUserOrganizationId: string | null = null;
 
   constructor(
     private waterQualityService: WaterQualityService,
     private organizationService: OrganizationService,
-    private router: Router
+    private router: Router,
+    private organizationResolver: OrganizationResolverService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.setCurrentUserOrganization();
     this.loadPoints();
     this.loadZones();
+  }
+
+  private setCurrentUserOrganization(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.organizationId) {
+      this.currentUserOrganizationId = currentUser.organizationId;
+      console.log('Organización del usuario:', this.currentUserOrganizationId);
+    } else {
+      console.error('Usuario no tiene organización asignada');
+      this.router.navigate(['/unauthorized']);
+    }
   }
 
   loadPoints(): void {
@@ -53,11 +71,14 @@ export class TestingListComponent implements OnInit {
   }
   
   loadZones(): void {
+    if (this.currentUserOrganizationId) {
     this.organizationService.getAllZones().subscribe({
       next: (zones) => {
-        this.zones = zones;
+          // Filtrar solo las zonas de la organización del usuario
+          this.zones = zones.filter(zone => zone.organizationId === this.currentUserOrganizationId);
       }
     });
+    }
   }
 
   getZoneNameById(zoneId: string): string {
@@ -237,5 +258,43 @@ export class TestingListComponent implements OnInit {
       timer: 1800,
       showConfirmButton: false
     });
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    const months = [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear().toString().slice(-2);
+    
+    return `${day}-${month}-${year}`;
+  }
+
+  getOrganizationName(organizationId: string): string {
+    if (organizationId === this.currentUserOrganizationId) {
+      // Obtener el nombre real de la organización usando el servicio
+      this.organizationResolver.getOrganizationName(organizationId).subscribe({
+        next: (organizationName) => {
+          console.log('Nombre de organización cargado:', organizationName);
+          // Aquí podrías actualizar la vista si fuera necesario
+        },
+        error: (error) => {
+          console.error('Error al cargar nombre de organización:', error);
+        }
+      });
+      
+      // Por ahora retornamos un nombre genérico, pero en una implementación completa
+      // podrías usar un observable o un estado local para mostrar el nombre real
+      return `Organización ${organizationId}`;
+    }
+    return organizationId;
   }
 }

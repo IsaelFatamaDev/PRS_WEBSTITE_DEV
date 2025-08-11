@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WaterQualityService } from '../../../../../core/services/water-quality.service';
 import { testing_points, PointType, Status } from '../../../../../core/models/water-quality.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
+import { OrganizationResolverService } from '../../../../../core/services/organization-resolver.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { organization, zones } from '../../../../../core/models/organization.model';
 
 @Component({
@@ -25,31 +27,65 @@ export class TestingFormComponent implements OnInit {
   originalValues: any = {};
   zones: zones[] = [];
   organizations: organization[] = [];
+  organizationName: string = '';
+  currentUserOrganizationId: string | null = null;
   constructor(
     private fb: FormBuilder,
     private waterQualityService: WaterQualityService,
     private organizationService: OrganizationService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private organizationResolver: OrganizationResolverService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.setCurrentUserOrganization();
     this.initForm();
     this.checkEditMode();
     this.loadOrganizations();
     this.loadZones();
   }
 
+  private setCurrentUserOrganization(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.organizationId) {
+      this.currentUserOrganizationId = currentUser.organizationId;
+      
+      // Obtener el nombre real de la organización
+      this.organizationResolver.getOrganizationName(this.currentUserOrganizationId).subscribe({
+        next: (organizationName) => {
+          this.organizationName = organizationName;
+          console.log('Nombre de organización cargado:', this.organizationName);
+        },
+        error: (error) => {
+          console.error('Error al cargar nombre de organización:', error);
+          this.organizationName = `Organización ${this.currentUserOrganizationId}`;
+        }
+      });
+      
+      console.log('Organización del usuario:', this.currentUserOrganizationId);
+    } else {
+      console.error('Usuario no tiene organización asignada');
+      this.router.navigate(['/unauthorized']);
+    }
+  }
+
   private initForm(): void {
     this.pointForm = this.fb.group({
       pointName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       pointType: ['', [Validators.required]],
-      organizationId: ['', [Validators.required]],
+      organizationId: [this.currentUserOrganizationId || '', [Validators.required]],
       zoneId: ['', [Validators.required]],
       locationDescription: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       latitude: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitude: ['', [Validators.required, Validators.min(-180), Validators.max(180)]]
     });
+
+    // Deshabilitar el campo de organización ya que no es editable
+    if (this.currentUserOrganizationId) {
+      this.pointForm.get('organizationId')?.disable();
+    }
   }
 
   private checkEditMode(): void {
@@ -79,19 +115,19 @@ export class TestingFormComponent implements OnInit {
   } 
 
   loadZones(): void {
-    this.organizationService.getAllZones().subscribe({
-      next: (zones) => {
-        this.zones = zones;
-      }
-    });
+    if (this.currentUserOrganizationId) {
+      this.organizationService.getAllZones().subscribe({
+        next: (zones) => {
+          // Filtrar solo las zonas de la organización del usuario
+          this.zones = zones.filter(zone => zone.organizationId === this.currentUserOrganizationId);
+        }
+      });
+    }
   }
 
   loadOrganizations(): void {
-    this.organizationService.getAllOrganization().subscribe({
-      next: (organizations) => {
-        this.organizations = organizations;
-      }
-    });
+    // No es necesario cargar todas las organizaciones ya que solo se muestra la del usuario
+    // Se mantiene el método por compatibilidad pero no hace nada
   }
 
   
@@ -100,12 +136,15 @@ export class TestingFormComponent implements OnInit {
     this.pointForm.patchValue({
       pointName: point.pointName,
       pointType: point.pointType,
-      organizationId: point.organizationId,
+      organizationId: this.currentUserOrganizationId, // Usar la organización del usuario logueado
       zoneId: point.zoneId,
       locationDescription: point.locationDescription,
       latitude: point.coordinates.latitude,
       longitude: point.coordinates.longitude
     });
+
+    // Asegurar que la organización esté deshabilitada
+    this.pointForm.get('organizationId')?.disable();
   }
 
   onSubmit(): void {
@@ -131,7 +170,7 @@ export class TestingFormComponent implements OnInit {
     const baseData = {
       pointName: formValue.pointName,
       pointType: formValue.pointType,
-      organizationId: formValue.organizationId,
+      organizationId: this.currentUserOrganizationId, // Usar la organización del usuario logueado
       zoneId: formValue.zoneId,
       locationDescription: formValue.locationDescription,
       coordinates: {
