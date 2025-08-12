@@ -1,19 +1,37 @@
 import { Injectable } from '@angular/core';
-import { Observable, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { WaterBox, WaterBoxAssignment, WaterBoxTransfer } from '../models/box.model';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+
+export interface UserClient {
+  id: string;
+  username: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoxService {
-private waterBoxBaseUrl = `${environment.infrastructureApiUrl}/water-boxes`;
-private waterBoxAssignmentBaseUrl = `${environment.infrastructureApiUrl}/water-box-assignments`;
-private waterBoxTransferBaseUrl = `${environment.infrastructureApiUrl}/water-box-transfers`;
+private infraBase = (environment.infrastructureApiUrl || '').replace(/\/+$/, '');
+private waterBoxBaseUrl = `${this.infraBase}/water-boxes`;
+private waterBoxAssignmentBaseUrl = `${this.infraBase}/water-box-assignments`;
+private waterBoxTransferBaseUrl = `${this.infraBase}/water-box-transfers`;
 
-  constructor(private api: ApiService) { }
+  private userClientApiUrl = 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1/users/role/CLIENT';
+  private userBaseUrl = 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1';
+
+  constructor(private api: ApiService, private http: HttpClient) { }
+  getClients(): Observable<UserClient[]> {
+    return this.http.get<any>(this.userClientApiUrl).pipe(
+      map(res => {
+        console.log('Respuesta de la API de usuarios:', res); // Registro de depuración
+        return (res.data || []).map((u: any) => ({ id: u.id, username: u.username }));
+      })
+    );
+  }
 
   // WaterBoxService methods
   getAllWaterBoxes(): Observable<WaterBox[]> {
@@ -82,6 +100,16 @@ private waterBoxTransferBaseUrl = `${environment.infrastructureApiUrl}/water-box
     return this.api.patchInfrastructureDirect<WaterBoxAssignment>(`${this.waterBoxAssignmentBaseUrl}/${id}/restore`, {});
   }
 
+  // Obtener asignaciones por ID de caja (combina activas e inactivas y filtra por waterBoxId)
+  getWaterBoxAssignmentsByBoxId(waterBoxId: number): Observable<WaterBoxAssignment[]> {
+    return forkJoin([
+      this.getAllActiveWaterBoxAssignments(),
+      this.getAllInactiveWaterBoxAssignments()
+    ]).pipe(
+      map(([active, inactive]) => [...active, ...inactive].filter(a => a.waterBoxId === waterBoxId))
+    );
+  }
+
   // WaterBoxTransferService methods
   getAllWaterBoxTransfers(): Observable<WaterBoxTransfer[]> {
     return this.api.getInfrastructureDirect<WaterBoxTransfer[]>(this.waterBoxTransferBaseUrl);
@@ -105,5 +133,43 @@ private waterBoxTransferBaseUrl = `${environment.infrastructureApiUrl}/water-box
 
   restoreWaterBoxTransfer(id: number): Observable<WaterBoxTransfer> {
     return this.api.patchInfrastructureDirect<WaterBoxTransfer>(`${this.waterBoxTransferBaseUrl}/${id}/restore`, {});
+  }
+
+  // --- Helpers para enriquecer transferencias ---
+  /**
+   * Obtener usuario básico por ID desde ms-user (usa llamada directa con token)
+   */
+  getUserBasicById(userId: string): Observable<UserClient> {
+    const url = `${this.userBaseUrl}/auth/token/user/${userId}`;
+    return this.api.getInfrastructureDirect<any>(url).pipe(
+      map((res: any) => {
+        const d = (res && (res.data ?? res)) || {};
+        const username = d.username || d.fullName || d.name || 'Usuario desconocido';
+        return { id: d.id || userId, username } as UserClient;
+      }),
+      catchError(() => of({ id: userId, username: 'Usuario desconocido' } as UserClient))
+    );
+  }
+
+  /** Obtener asignaciones por IDs y devolver un Map id -> asignación */
+  getAssignmentsByIds(ids: number[]): Observable<Map<number, WaterBoxAssignment>> {
+    const unique = Array.from(new Set(ids.filter((v) => v != null)));
+    if (unique.length === 0) {
+      return new Observable<Map<number, WaterBoxAssignment>>((obs) => { obs.next(new Map()); obs.complete(); });
+    }
+    return forkJoin(unique.map((id) => this.getWaterBoxAssignmentById(id).pipe(catchError(() => of(null as unknown as WaterBoxAssignment))))).pipe(
+      map((assignments) => new Map(assignments.filter(a => !!a).map((a) => [a.id, a])))
+    );
+  }
+
+  /** Obtener usuarios por IDs y devolver un Map userId -> username */
+  getUsersByIds(userIds: string[]): Observable<Map<string, string>> {
+    const unique = Array.from(new Set(userIds.filter((v) => !!v)));
+    if (unique.length === 0) {
+      return new Observable<Map<string, string>>((obs) => { obs.next(new Map()); obs.complete(); });
+    }
+    return forkJoin(unique.map((id) => this.getUserBasicById(id).pipe(catchError(() => of({ id, username: 'Usuario desconocido' } as UserClient))))).pipe(
+      map((users) => new Map(users.map((u) => [u.id, u.username])))
+    );
   }
 }

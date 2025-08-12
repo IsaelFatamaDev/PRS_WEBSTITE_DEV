@@ -1,9 +1,11 @@
+  // ...imports y definición de la clase...
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BoxService } from '../../../../core/services/box.service';
+import { UserClient } from '../../../../core/services/box.service';
 import { WaterBoxAssignment, Status, WaterBox } from 'app/core/models/box.model';
 @Component({
   selector: 'app-box-assignment',
@@ -20,10 +22,11 @@ export class BoxAssignmentComponent implements OnInit {
   form: FormGroup;
   currentId: number | null = null;
   statusOptions = Object.values(Status);
-  waterBoxIds: number[] = [];
+  waterBoxes: { id: number; boxCode: string }[] = [];
   showDetailsModal = false;
   selectedAssignment: WaterBoxAssignment | null = null;
   selectedWaterBox: WaterBox | null = null;
+  clientUsers: UserClient[] = [];
 
   constructor(
     private boxService: BoxService,
@@ -31,7 +34,7 @@ export class BoxAssignmentComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       waterBoxId: ['', Validators.required],
-      userId: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
+      userId: ['', [Validators.required]],
       startDate: ['', Validators.required],
       endDate: [''],
       monthlyFee: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
@@ -42,6 +45,19 @@ export class BoxAssignmentComponent implements OnInit {
   ngOnInit() {
     this.fetchAssignments();
     this.fetchWaterBoxIds();
+    this.boxService.getClients().subscribe({
+      next: (users) => {
+        this.clientUsers = users;
+      },
+      error: (err) => {
+        console.error('Error fetching client users', err);
+      }
+    });
+  }
+  
+  getUsernameById(id: string): string {
+    const user = this.clientUsers.find(u => u.id === id);
+    return user ? user.username : id;
   }
 
   fetchAssignments(activeOnly: boolean = true) {
@@ -73,14 +89,14 @@ export class BoxAssignmentComponent implements OnInit {
       });
     } else {
       this.currentId = null;
-      this.form.reset({ status: Status.ACTIVE });
+  this.form.reset({ status: Status.ACTIVE });
     }
     this.fetchWaterBoxIds();
   }
 
   closeModal() {
     this.showModal = false;
-    this.form.reset({ status: Status.ACTIVE });
+  this.form.reset({ status: Status.ACTIVE });
     this.currentId = null;
   }
 
@@ -108,11 +124,11 @@ export class BoxAssignmentComponent implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid) {
+  if (this.form.invalid) {
       Swal.fire('Error', 'Por favor, complete todos los campos requeridos y válidos.', 'error');
       return;
     }
-    const value = { ...this.form.value };
+  const value = { ...this.form.value };
     if (value.startDate) {
       value.startDate = new Date(value.startDate).toISOString();
     }
@@ -182,11 +198,15 @@ export class BoxAssignmentComponent implements OnInit {
   fetchWaterBoxIds() {
     this.boxService.getAllWaterBoxes().subscribe({
       next: (boxes) => {
-        this.waterBoxIds = boxes.map(box => box.id).sort((a, b) => a - b);
+        this.waterBoxes = boxes.map(box => ({ id: box.id, boxCode: box.boxCode })).sort((a, b) => a.id - b.id);
       },
       error: (err) => {
         console.error('Error fetching water box IDs', err);
       }
     });
+  }
+  getBoxCodeById(id: number): string {
+    const box = this.waterBoxes.find(b => b.id === id);
+    return box ? box.boxCode : id.toString();
   }
 }

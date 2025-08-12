@@ -15,7 +15,7 @@ export enum Status {
 
 export interface WaterBox {
   id: number;
-  organizationId: number;
+  organizationId: string;
   boxCode: string;
   boxType: BoxType;
   installationDate: string; // ISO date
@@ -28,7 +28,8 @@ export interface WaterBox {
 export interface WaterBoxAssignment {
   id: number;
   waterBoxId: number;
-  userId: number;
+  userId: string;
+  username?: string; // Nombre del usuario asociado
   startDate: string; // ISO date-time
   endDate?: string; // ISO date-time
   monthlyFee: number;
@@ -46,4 +47,6 @@ export interface WaterBoxTransfer {
    transferReason: string;
    documents?: string[] | null;
    createdAt: string; // ISO date-time
+   oldAssignmentUsername?: string;
+   newAssignmentUsername?: string;
 }
