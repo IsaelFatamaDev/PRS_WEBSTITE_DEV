@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { OrganizationListComponent } from './components/organization-list/organization-list.component';
 import { OrganizationFormComponent } from './components/organization-form/organization-form.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ZoneListComponent } from './components/zone/zone-list/zone-list.component';
 import { ZoneFormComponent } from './components/zone/zone-form/zone-form.component';
 import { StreetListComponent } from './components/street/street-list/street-list.component';
@@ -9,7 +10,11 @@ import { StreetFormComponent } from './components/street/street-form/street-form
 
 const routes: Routes = [
   {
-    path:"",
+    path:"dashboard",
+    component:DashboardComponent
+  },
+  {
+    path:"list",
     component:OrganizationListComponent
   },
   {
@@ -44,10 +49,7 @@ const routes: Routes = [
     path:"street/edit/:id",
     component:StreetFormComponent
   }
-
 ];
-
-
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

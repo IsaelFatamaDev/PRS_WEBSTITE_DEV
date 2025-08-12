@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { OrganizationsRoutingModule } from './organizations-routing.module';
 import { OrganizationFormComponent } from './components/organization-form/organization-form.component';
 import { OrganizationListComponent } from './components/organization-list/organization-list.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FormsModule } from '@angular/forms';
+
 @NgModule({
   declarations: [],
   imports: [
@@ -12,11 +14,13 @@ import { FormsModule } from '@angular/forms';
     FormsModule,
     OrganizationsRoutingModule,
     OrganizationFormComponent,
-    OrganizationListComponent
+    OrganizationListComponent,
+    DashboardComponent
   ],
   exports:[
     OrganizationFormComponent,
-    OrganizationListComponent
+    OrganizationListComponent,
+    DashboardComponent
   ]
 })
 export class OrganizationsModule { }

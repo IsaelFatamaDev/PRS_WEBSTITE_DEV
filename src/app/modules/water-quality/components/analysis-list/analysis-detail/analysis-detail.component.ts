@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WaterQualityService } from '../../../../../core/services/water-quality.service';
 import { QualityTest, testing_points } from '../../../../../core/models/water-quality.model';
+import { OrganizationResolverService } from '../../../../../core/services/organization-resolver.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 
 @Component({
@@ -17,11 +19,14 @@ export class AnalysisDetailComponent implements OnInit {
   error = false;
   errorMessage = '';
   testingPoints: testing_points[] = [];
+  organizationName: string = '';
 
   constructor(
     private waterQualityService: WaterQualityService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private organizationResolver: OrganizationResolverService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -33,6 +38,7 @@ export class AnalysisDetailComponent implements OnInit {
       this.handleError('ID de análisis no proporcionado');
     }
     this.loadTestingPoints();
+    this.loadOrganizationName();
   }
 
   getTestingPointName(testingPointId: string): string {
@@ -131,5 +137,24 @@ export class AnalysisDetailComponent implements OnInit {
         console.error('Error al cargar los puntos de prueba:', error);
       }
     });
+  }
+
+  private loadOrganizationName(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.organizationId) {
+      this.organizationResolver.getOrganizationName(currentUser.organizationId).subscribe({
+        next: (organizationName) => {
+          this.organizationName = organizationName;
+          console.log('Nombre de organización cargado:', this.organizationName);
+        },
+        error: (error) => {
+          console.error('Error al cargar nombre de organización:', error);
+          this.organizationName = `Organización ${currentUser.organizationId}`;
+        }
+      });
+    } else {
+      console.warn('Usuario no tiene organización asignada');
+      this.organizationName = 'Organización no disponible';
+    }
   }
 }

@@ -165,4 +165,35 @@ export class AnalysisListComponent implements OnInit {
       }
     });
   }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    const months = [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear().toString().slice(-2);
+    
+    return `${day}-${month}-${year}`;
+  }
+
+  getTestTypeLabel(testType: string): string {
+    switch (testType) {
+      case 'RUTINARIO':
+        return 'Rutinario';
+      case 'ESPECIAL':
+        return 'Especial';
+      case 'INCIDENCIA':
+        return 'Incidencia';
+      default:
+        return testType;
+    }
+  }
 }

@@ -177,7 +177,17 @@
             <div class="overflow-hidden transition-all duration-300" [class.max-h-0]="!isOrganizationsDropdownOpen"
               [class.max-h-96]="isOrganizationsDropdownOpen">
               <div class="mt-2 ml-4 space-y-1">
-                <a routerLink="/super-admin/organizations" routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                <a routerLink="/super-admin/organizations/dashboard"
+                  routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                  class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                  (click)="onOptionSelected()">
+                  <div
+                    class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                    <i class="text-xs fas fa-map-marker-alt text-sky-200 dark:text-gray-400"></i>
+                  </div>
+                  <span class="font-medium">Dashboard</span>
+                </a>
+                <a routerLink="/super-admin/organizations/list" routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
                   class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
                   (click)="onOptionSelected()">
                   <div
@@ -186,6 +196,7 @@
                   </div>
                   <span class="font-medium"> Organizaciones</span>
                 </a>
+                
                 <a routerLink="/super-admin/organizations/zonas"
                   routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
                   class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"

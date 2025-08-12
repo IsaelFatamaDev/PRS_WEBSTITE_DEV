@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { WaterQualityService } from '../../../../../core/services/water-quality.service';
 import { QualityTest, testing_points } from '../../../../../core/models/water-quality.model';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { OrganizationResolverService } from '../../../../../core/services/organization-resolver.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -17,22 +19,37 @@ export class AnalysisFormComponent implements OnInit {
   isSubmitting = false;
   analysisId: string | null = null;
   testingPoints: testing_points[] = [];
+  currentUserOrganizationId: string | null = null;
+  currentUserOrganizationName: string = '';
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private waterQualityService: WaterQualityService
+    private waterQualityService: WaterQualityService,
+    private authService: AuthService,
+    private organizationResolver: OrganizationResolverService
   ) {
     this.analysisForm = this.fb.group({
       organizationId: ['', [Validators.required]],
       testDate: ['', [Validators.required]],
       testType: ['', [Validators.required]],
       testingPointId: ['', [Validators.required]],
-      waterTemperature: ['', [Validators.required, Validators.min(-50), Validators.max(100), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
-      weatherConditions: ['', [Validators.maxLength(100)]],
+      waterTemperature: ['', [
+        Validators.required, 
+        Validators.min(-50), 
+        Validators.max(100), 
+        Validators.pattern(/^-?\d+(\.\d{1,2})?$/)
+      ]],
+      weatherConditions: ['', [
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-\.]+$/)
+      ]],
       results: this.fb.array([]),
-      generalObservations: ['', [Validators.maxLength(500)]],
+      generalObservations: ['', [
+        Validators.maxLength(500),
+        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-\.\,\;\:\!\?\(\)]+$/)
+      ]],
       status: ['PENDING', [Validators.required]]
     });
 
@@ -59,7 +76,10 @@ export class AnalysisFormComponent implements OnInit {
     this.analysisId = this.route.snapshot.paramMap.get('id');
     console.log('ID del análisis:', this.analysisId);
     
-    // Cargar puntos de prueba
+    // Obtener la organización del usuario logueado
+    this.setCurrentUserOrganization();
+    
+    // Cargar puntos de prueba filtrados por organización
     this.loadTestingPoints();
     
     if (this.analysisId) {
@@ -68,6 +88,39 @@ export class AnalysisFormComponent implements OnInit {
       this.loadAnalysis();
     } else {
       console.log('Modo creación activado');
+    }
+  }
+
+  private setCurrentUserOrganization(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.organizationId) {
+      this.currentUserOrganizationId = currentUser.organizationId;
+      
+      // Obtener el nombre real de la organización
+      this.organizationResolver.getOrganizationName(this.currentUserOrganizationId).subscribe({
+        next: (organizationName) => {
+          this.currentUserOrganizationName = organizationName;
+          console.log('Nombre de organización cargado:', this.currentUserOrganizationName);
+        },
+        error: (error) => {
+          console.error('Error al cargar nombre de organización:', error);
+          this.currentUserOrganizationName = `Organización ${this.currentUserOrganizationId}`;
+        }
+      });
+      
+      // Establecer la organización en el formulario (no editable)
+      this.analysisForm.patchValue({
+        organizationId: this.currentUserOrganizationId
+      });
+      
+      // Deshabilitar el campo de organización
+      this.analysisForm.get('organizationId')?.disable();
+      
+      console.log('Organización del usuario:', this.currentUserOrganizationId);
+    } else {
+      console.error('Usuario no tiene organización asignada');
+      // Redirigir o mostrar error
+      this.router.navigate(['/unauthorized']);
     }
   }
 
@@ -82,18 +135,27 @@ export class AnalysisFormComponent implements OnInit {
     this.waterQualityService.getTestById(this.analysisId).subscribe({
       next: (analysis) => {
         if (analysis) {
+          // Verificar que el análisis pertenece a la organización del usuario
+          if (analysis.organizationId !== this.currentUserOrganizationId) {
+            console.error('El análisis no pertenece a la organización del usuario');
+            this.router.navigate(['/unauthorized']);
+            return;
+          }
+
           this.analysisForm.patchValue({
-            organizationId:analysis.organizationId,
+            organizationId: analysis.organizationId,
             testDate: this.formatDateForInput(analysis.testDate),
             testType: analysis.testType,
             testingPointId: analysis.testingPointId,
             waterTemperature: analysis.waterTemperature,
             weatherConditions: analysis.weatherConditions,
             generalObservations: analysis.generalObservations,
-            status:analysis.status  
+            status: analysis.status
           });
+          
           // Guardar testCode para update
           this.analysisForm.addControl('testCode', this.fb.control(analysis.testCode));
+          
           // Cargar resultados
           if (analysis.results && analysis.results.length > 0) {
             analysis.results.forEach(result => {
@@ -111,11 +173,28 @@ export class AnalysisFormComponent implements OnInit {
   addResult(result?: any): void {
     console.log('Agregando resultado:', result);
     const resultForm = this.fb.group({
-      parameterCode: [result?.parameterCode || '', Validators.required],
-      measuredValue: [result?.measuredValue || '', [Validators.required, Validators.min(0)]],
-      unit: [result?.unit || '', Validators.required],
-      status: [result?.status || 'ACCEPTABLE', Validators.required],
-      observations: [result?.observations || '']
+      parameterCode: [result?.parameterCode || '', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(20),
+        Validators.pattern(/^[A-Z0-9\-_]+$/)
+      ]],
+      measuredValue: [result?.measuredValue || '', [
+        Validators.required, 
+        Validators.min(0),
+        Validators.pattern(/^\d+(\.\d{1,2})?$/)
+      ]],
+      unit: [result?.unit || '', [
+        Validators.required,
+        Validators.minLength(1),
+        Validators.maxLength(10),
+        Validators.pattern(/^[a-zA-Z\/%°]+$/)
+      ]],
+      status: [result?.status || 'ACCEPTABLE', [Validators.required]],
+      observations: [result?.observations || '', [
+        Validators.maxLength(200),
+        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-\.\,\;\:\!\?\(\)]+$/)
+      ]]
     });
 
     this.resultsArray.push(resultForm);
@@ -158,7 +237,6 @@ export class AnalysisFormComponent implements OnInit {
       ? this.waterQualityService.updateTest(this.analysisId!, formData)
       : this.waterQualityService.createTest(formData);
 
-
     request.subscribe({
       next: (response) => {
         console.log('Respuesta exitosa:', response);
@@ -184,7 +262,7 @@ export class AnalysisFormComponent implements OnInit {
     // Asegurarse de que todos los campos numéricos sean números
     const preparedData: QualityTest = {
       id: formValue.id || '',
-      organizationId: formValue.organizationId,
+      organizationId: this.currentUserOrganizationId!, // Usar la organización del usuario
       testCode: this.isEditMode && formValue.testCode ? formValue.testCode : '',
       testDate: new Date(formValue.testDate).toISOString(),
       testType: formValue.testType,
@@ -209,7 +287,6 @@ export class AnalysisFormComponent implements OnInit {
       const value = preparedData[typedKey];
       
       if (value === undefined || value === null) {
-        
         if (typeof value === 'number') {
           (preparedData[typedKey] as number) = 0;
         } else if (Array.isArray(value)) {
@@ -262,16 +339,41 @@ export class AnalysisFormComponent implements OnInit {
     if (field.errors['required']) errorMessage = 'Este campo es requerido';
     else if (field.errors['min']) errorMessage = `El valor mínimo es ${field.errors['min'].min}`;
     else if (field.errors['max']) errorMessage = `El valor máximo es ${field.errors['max'].max}`;
+    else if (field.errors['minlength']) errorMessage = `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+    else if (field.errors['maxlength']) errorMessage = `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
+    else if (field.errors['pattern']) errorMessage = 'Formato inválido';
     else errorMessage = 'Campo inválido';
 
     console.log(`Error en campo ${fieldName}:`, { error: field.errors, mensaje: errorMessage });
     return errorMessage;
   }
 
+  // Validaciones específicas para resultados
+  isResultFieldInvalid(resultIndex: number, fieldName: string): boolean {
+    const resultGroup = this.resultsArray.at(resultIndex) as FormGroup;
+    const field = resultGroup.get(fieldName);
+    return field ? field.invalid && (field.dirty || field.touched) : false;
+  }
+
+  getResultFieldError(resultIndex: number, fieldName: string): string {
+    const resultGroup = this.resultsArray.at(resultIndex) as FormGroup;
+    const field = resultGroup.get(fieldName);
+    if (!field || !field.errors) return '';
+
+    let errorMessage = '';
+    if (field.errors['required']) errorMessage = 'Este campo es requerido';
+    else if (field.errors['min']) errorMessage = `El valor mínimo es ${field.errors['min'].min}`;
+    else if (field.errors['minlength']) errorMessage = `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+    else if (field.errors['maxlength']) errorMessage = `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
+    else if (field.errors['pattern']) errorMessage = 'Formato inválido';
+    else errorMessage = 'Campo inválido';
+
+    return errorMessage;
+  }
+
   isFormValid(): boolean {
     return this.analysisForm.valid;
   }
-  
 
   goBack(): void {
     console.log('Navegando hacia atrás');
@@ -279,10 +381,15 @@ export class AnalysisFormComponent implements OnInit {
   }
 
   loadTestingPoints(): void {
+    // Filtrar puntos de prueba por la organización del usuario actual
     this.waterQualityService.getAllTestingPoints().subscribe({
       next: (points) => {
-        console.log('Puntos de prueba cargados:', points);
-        this.testingPoints = points;
+        console.log('Todos los puntos de prueba:', points);
+        // Filtrar solo los puntos de la organización del usuario
+        this.testingPoints = points.filter(point => 
+          point.organizationId === this.currentUserOrganizationId
+        );
+        console.log('Puntos de prueba filtrados por organización:', this.testingPoints);
       },
       error: (error) => {
         console.error('Error al cargar los puntos de prueba:', error);

@@ -8,6 +8,12 @@ import { OrganizationService } from '../../../../../core/services/organization.s
 import { organization } from '../../../../../core/models/organization.model';
 import { User, UserResponseDTO } from '../../../../../core/models/user.model';
 import { UserService } from '../../../../../core/services/user.service';
+import { AuthUser } from 'app/core/models/auth.model';
+import { OrganizationResolverService } from 'app/core/services/organization-resolver.service';
+import { Subscription } from 'rxjs';
+import { OrganizationContextService } from 'app/core/services/organization-context.service';
+import { AuthService } from 'app/core/services/auth.service';
+
 @Component({
   selector: 'app-chlorine-form',
   imports: [ReactiveFormsModule,CommonModule],
@@ -15,6 +21,7 @@ import { UserService } from '../../../../../core/services/user.service';
   styleUrl: './chlorine-form.component.css'
 })
 export class ChlorineFormComponent implements OnInit {
+  currentUser: AuthUser | null = null;
   chlorineForm: FormGroup;
   isEditMode = false;
   chlorineId: string | null = null;
@@ -27,12 +34,18 @@ export class ChlorineFormComponent implements OnInit {
   testingPoints: testing_points[] = [];
   organizations: organization[] = [];
   users: UserResponseDTO[] = [];
+  organizationName: string = '';
+  organizationInfo: any = null;
+
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private fb: FormBuilder,
+    private organizationResolver: OrganizationResolverService,
     private qualityService: WaterQualityService,
-    private organizationService: OrganizationService,
     private usersService: UserService,
+    private organizationContextService: OrganizationContextService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -40,16 +53,42 @@ export class ChlorineFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser();
+    console.log('Usuario actual cargado:', this.currentUser);
+    
     this.chlorineId = this.route.snapshot.paramMap.get('id');
     this.loadTestingPoints();
-    this.loadOrganizations();
     this.loadUsers();
+    
+    // Establecer la organización y usuario del usuario actual en el formulario
+    if (this.currentUser?.organizationId) {
+      console.log('Estableciendo organización en formulario:', this.currentUser.organizationId);
+      this.chlorineForm.patchValue({
+        organizationId: this.currentUser.organizationId,
+        recordedByUserId: this.currentUser.id
+      });
+      // Cargar el nombre de la organización después de establecer el ID
+      this.loadOrganizationName();
+    } else {
+      console.warn('No se pudo obtener la organización del usuario actual');
+    }
+    
     if (this.chlorineId) {
       this.isEditMode = true;
       this.loadChlorine();
     }
+    
+    this.subscriptions.add(
+      this.organizationContextService.organizationContext$.subscribe(context => {
+        this.organizationInfo = context;
+        console.log('Contexto de organización actualizado:', context);
+      })
+    );
   }
-
+ ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  
   private createForm(): FormGroup {
     return this.fb.group({
       organizationId: ['', Validators.required],
@@ -59,7 +98,7 @@ export class ChlorineFormComponent implements OnInit {
       level: ['', [Validators.required, Validators.min(0), Validators.max(10)]],
       acceptable: [false, Validators.required],
       actionRequired: [false, Validators.required],
-      recordedByUserId: ['', [Validators.required]],
+      recordedByUserId: [''],
       observations: ['', [Validators.required, Validators.minLength(10)]],
       amount: ['', [Validators.required, Validators.min(0)]],
     });
@@ -76,7 +115,7 @@ export class ChlorineFormComponent implements OnInit {
       const isModified = JSON.stringify(currentValue) !== JSON.stringify(originalValue);
       
       return isModified && field.invalid && (field.dirty || field.touched);
-  }
+    }
 
     return field.invalid && (field.dirty || field.touched);
   }
@@ -101,13 +140,33 @@ export class ChlorineFormComponent implements OnInit {
     });
   }
 
-  loadOrganizations() {
-    this.organizationService.getAllOrganization().subscribe({
-      next: (organizations) => {
-        console.log('Organizaciones cargados:', organizations);
-        this.organizations = organizations;
-      },
-    });
+  private loadOrganizationName(): void {
+    if (!this.currentUser?.organizationId) {
+      console.warn('No se encontró organizationId en el usuario actual');
+      return;
+    }
+
+    this.subscriptions.add(
+      this.organizationResolver.getAllOrganizations().subscribe({
+        next: (organizations) => {
+          console.log('Organizaciones cargadas:', organizations);
+          const currentOrg = organizations.find(org => org.organizationId === this.currentUser?.organizationId);
+          console.log('Organización actual encontrada:', currentOrg);
+          
+          if (currentOrg) {
+            this.organizationName = currentOrg.organizationName;
+            console.log('Nombre de organización establecido:', this.organizationName);
+          } else {
+            this.organizationName = this.currentUser?.organizationId || 'Organización no encontrada';
+            console.log('Usando ID de organización como nombre:', this.organizationName);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading organization name:', error);
+          this.organizationName = this.currentUser?.organizationId || 'Error al cargar';
+        }
+      })
+    );
   }
 
 loadUsers() {
@@ -163,6 +222,14 @@ loadUsers() {
 
   onSubmit(): void {
     console.log('Formulario actual:', this.chlorineForm.value);
+    
+    // Asegurar que siempre se envíe la organización y usuario del usuario actual
+    if (this.currentUser?.organizationId && this.currentUser?.id) {
+      this.chlorineForm.patchValue({
+        organizationId: this.currentUser.organizationId,
+        recordedByUserId: this.currentUser.id
+      });
+    }
     
     if (this.isEditMode) {
       // En modo edición, validar todos los campos
@@ -281,13 +348,28 @@ loadUsers() {
   }
 
   loadTestingPoints(): void {
+    if (!this.currentUser?.organizationId) {
+      console.warn('No se puede cargar puntos de prueba sin organización del usuario');
+      this.testingPoints = [];
+      return;
+    }
+
     this.qualityService.getAllTestingPoints().subscribe({
       next: (points) => {
-        console.log('Puntos de prueba cargados:', points);
-        this.testingPoints = points;
+        console.log('Todos los puntos de prueba cargados:', points);
+        // Filtrar solo los puntos de prueba de la organización del usuario actual
+        this.testingPoints = points.filter(point => 
+          point.organizationId === this.currentUser?.organizationId
+        );
+        console.log('Puntos de prueba filtrados por organización:', this.testingPoints);
+        
+        if (this.testingPoints.length === 0) {
+          console.warn(`No se encontraron puntos de prueba para la organización: ${this.currentUser?.organizationId}`);
+        }
       },
       error: (error) => {
         console.error('Error al cargar los puntos de prueba:', error);
+        this.testingPoints = [];
       }
     });
   }
@@ -319,5 +401,15 @@ loadUsers() {
   getUserNameById(userId: string): string {
     const user = this.users.find(u => u.id === userId);
     return user ? (user.fullName ) : userId;
+  }
+
+  getOrganizationDisplayName(): string {
+    if (this.organizationName && this.organizationName !== 'Error al cargar') {
+      return this.organizationName;
+    }
+    if (this.currentUser?.organizationId) {
+      return this.currentUser.organizationId;
+    }
+    return 'Organización no disponible';
   }
 }
