@@ -30,9 +30,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   products: ProductResponse[] = [];
   filteredProducts: ProductResponse[] = [];
+  paginatedProducts: ProductResponse[] = [];
   categories: ProductCategoryResponse[] = [];
   loading = true;
   error: string | null = null;
+
+  // Paginación
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+  totalPages = 0;
 
   // Filtros
   searchTerm = '';
@@ -42,6 +49,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Enums para el template
   ProductStatus = ProductStatus;
   UnitOfMeasure = UnitOfMeasure;
+  Math = Math;
 
   organizationId: string | null = null;
 
@@ -128,6 +136,56 @@ export class ProductListComponent implements OnInit, OnDestroy {
     });
 
     this.filteredProducts = filtered;
+    this.currentPage = 1; // Reset a primera página cuando se aplican filtros
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    this.totalItems = this.filteredProducts.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedProducts = this.filteredProducts.slice(startIndex, endIndex);
+  }
+
+  // Métodos de navegación de paginación
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+
+    // Ajustar si no hay suficientes páginas al final
+    if (endPage - startPage + 1 < maxPagesToShow && startPage > 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   onSearchChange(): void {

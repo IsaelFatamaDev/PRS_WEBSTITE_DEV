@@ -137,9 +137,9 @@ export class ProductDetailPageComponent implements OnInit {
      getStockStatusClass(): string {
           if (!this.product) return '';
 
-          if (this.product.currentStock === 0) return 'text-red-600 bg-red-50';
-          if (this.product.currentStock! <= 10) return 'text-yellow-600 bg-yellow-50';
-          return 'text-green-600 bg-green-50';
+          if (this.product.currentStock === 0) return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800';
+          if (this.product.currentStock! <= 10) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800';
+          return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800';
      }
 
      getStockStatusText(): string {

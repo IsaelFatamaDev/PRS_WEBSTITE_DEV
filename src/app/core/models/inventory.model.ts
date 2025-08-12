@@ -123,6 +123,7 @@ export interface ProductCategoryResponse {
      categoryName: string;
      description?: string;
      status: GeneralStatus;
+     productCount?: number; // Contador de productos en esta categoría
      createdAt: string;
      updatedAt: string;
 }

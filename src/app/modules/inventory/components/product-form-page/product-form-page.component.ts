@@ -26,7 +26,7 @@ interface ProductForm {
      maximumStock: number;
      currentStock: number;
      unitCost: number;
-     status: ProductStatus;
+     // Status removido - siempre será ACTIVO por defecto
 }
 
 @Component({
@@ -59,11 +59,10 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
           productName: '',
           categoryId: '',
           unitOfMeasure: UnitOfMeasure.UNIDAD,
-          minimumStock: 0,
-          maximumStock: 0,
+          minimumStock: 1,
+          maximumStock: 1,
           currentStock: 0,
-          unitCost: 0,
-          status: ProductStatus.ACTIVO
+          unitCost: 0.01
      };
 
      constructor(
@@ -169,11 +168,11 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                productName: product.productName,
                categoryId: product.categoryId,
                unitOfMeasure: product.unitOfMeasure,
-               minimumStock: product.minimumStock || 0,
-               maximumStock: product.maximumStock || 0,
+               minimumStock: product.minimumStock || 1,
+               maximumStock: product.maximumStock || 1,
                currentStock: product.currentStock || 0,
-               unitCost: product.unitCost || 0,
-               status: product.status
+               unitCost: product.unitCost || 0.01
+               // Status removido - siempre será ACTIVO
           };
      }
 
@@ -187,15 +186,16 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                this.productForm.categoryId &&
                this.productForm.categoryId.trim() !== '' &&
                this.productForm.unitOfMeasure &&
-               this.productForm.unitCost >= 0 &&
-               this.productForm.minimumStock >= 0 &&
-               this.productForm.maximumStock >= 0 &&
+               this.productForm.unitCost > 0 &&
+               this.productForm.minimumStock > 0 &&
+               this.productForm.maximumStock > 0 &&
+               this.productForm.minimumStock <= this.productForm.maximumStock &&
                this.productForm.currentStock >= 0
           );
      }
 
      // Envío del formulario
-     onSubmit(): void {
+     async onSubmit(): Promise<void> {
           if (this.saving) return;
 
           // Validaciones específicas
@@ -209,7 +209,16 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                return;
           }
 
-          if (!this.productForm.categoryId || this.productForm.categoryId.trim() === '') {
+          // Validar producto duplicado por nombre
+          if (await this.isProductNameDuplicated()) {
+               Swal.fire({
+                    icon: 'warning',
+                    title: 'Producto duplicado',
+                    text: 'Ya existe un producto con este nombre en la organización',
+                    confirmButtonText: 'Entendido'
+               });
+               return;
+          } if (!this.productForm.categoryId || this.productForm.categoryId.trim() === '') {
                Swal.fire({
                     icon: 'warning',
                     title: 'Categoría requerida',
@@ -219,17 +228,37 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                return;
           }
 
-          if (this.productForm.unitCost < 0) {
+          if (this.productForm.unitCost <= 0) {
                Swal.fire({
                     icon: 'warning',
                     title: 'Costo inválido',
-                    text: 'El costo unitario no puede ser negativo',
+                    text: 'El costo unitario debe ser mayor a 0',
                     confirmButtonText: 'Entendido'
                });
                return;
           }
 
-          if (this.productForm.minimumStock > this.productForm.maximumStock && this.productForm.maximumStock > 0) {
+          if (this.productForm.minimumStock <= 0) {
+               Swal.fire({
+                    icon: 'warning',
+                    title: 'Stock mínimo inválido',
+                    text: 'El stock mínimo debe ser mayor a 0',
+                    confirmButtonText: 'Entendido'
+               });
+               return;
+          }
+
+          if (this.productForm.maximumStock <= 0) {
+               Swal.fire({
+                    icon: 'warning',
+                    title: 'Stock máximo inválido',
+                    text: 'El stock máximo debe ser mayor a 0',
+                    confirmButtonText: 'Entendido'
+               });
+               return;
+          }
+
+          if (this.productForm.minimumStock > this.productForm.maximumStock) {
                Swal.fire({
                     icon: 'warning',
                     title: 'Stock inválido',
@@ -237,9 +266,7 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                     confirmButtonText: 'Entendido'
                });
                return;
-          }
-
-          if (!this.isFormValid()) {
+          } if (!this.isFormValid()) {
                Swal.fire({
                     icon: 'warning',
                     title: 'Formulario incompleto',
@@ -280,7 +307,7 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                maximumStock: this.productForm.maximumStock,
                currentStock: this.productForm.currentStock,
                unitCost: this.productForm.unitCost,
-               status: this.productForm.status
+               status: ProductStatus.ACTIVO // Siempre ACTIVO por defecto
           };
 
           console.log('Enviando datos:', productRequest);
@@ -324,6 +351,29 @@ export class ProductFormPageComponent implements OnInit, OnDestroy {
                     });
                }
           });
+     }
+
+     /**
+      * Validar si el nombre del producto ya existe en la organización
+      */
+     private async isProductNameDuplicated(): Promise<boolean> {
+          try {
+               const products = await this.inventoryService.getProducts(this.organizationId!).toPromise();
+               if (!products) return false;
+
+               // Si es modo edición, excluir el producto actual de la validación
+               const filteredProducts = this.isEditMode
+                    ? products.filter(p => p.productId !== this.productId)
+                    : products;
+
+               // Verificar si existe un producto con el mismo nombre (case insensitive)
+               return filteredProducts.some(product =>
+                    product.productName.toLowerCase().trim() === this.productForm.productName.toLowerCase().trim()
+               );
+          } catch (error) {
+               console.error('Error validating product name:', error);
+               return false; // En caso de error, permitir continuar
+          }
      }
 
      // Navegación

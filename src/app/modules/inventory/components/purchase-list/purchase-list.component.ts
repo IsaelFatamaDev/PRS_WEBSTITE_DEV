@@ -37,6 +37,7 @@ export class PurchaseListComponent implements OnInit, OnDestroy {
 
   purchases: PurchaseResponse[] = [];
   filteredPurchases: PurchaseResponse[] = [];
+  paginatedPurchases: PurchaseResponse[] = [];
   suppliers: SupplierResponse[] = [];
   products: ProductResponse[] = [];
   users: Map<string, any> = new Map(); // Mapeo de userId -> usuario
@@ -47,6 +48,10 @@ export class PurchaseListComponent implements OnInit, OnDestroy {
   searchTerm = '';
   selectedStatus: PurchaseStatus | 'ALL' = 'ALL';
   selectedSupplier: string | 'ALL' = 'ALL';
+
+  // Paginación
+  currentPage = 1;
+  itemsPerPage = 6;
 
   // Modal states
   showCreateModal = false;
@@ -137,7 +142,9 @@ export class PurchaseListComponent implements OnInit, OnDestroy {
     );
 
     await Promise.all(userPromises);
-  } applyFilters(): void {
+  }
+
+  applyFilters(): void {
     let filtered = [...this.purchases];
 
     // Filter by search term
@@ -172,6 +179,8 @@ export class PurchaseListComponent implements OnInit, OnDestroy {
     });
 
     this.filteredPurchases = filtered;
+    this.currentPage = 1; // Reset page when filtering
+    this.updatePaginatedPurchases();
   }
 
   onSearchChange(): void {
@@ -184,6 +193,45 @@ export class PurchaseListComponent implements OnInit, OnDestroy {
 
   onSupplierChange(): void {
     this.applyFilters();
+  }
+
+  // Métodos de paginación
+  updatePaginatedPurchases(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedPurchases = this.filteredPurchases.slice(startIndex, endIndex);
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1;
+    this.updatePaginatedPurchases();
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedPurchases();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.getTotalPages()) {
+      this.currentPage++;
+      this.updatePaginatedPurchases();
+    }
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.filteredPurchases.length / this.itemsPerPage);
+  }
+
+  getStartItem(): number {
+    return (this.currentPage - 1) * this.itemsPerPage + 1;
+  }
+
+  getEndItem(): number {
+    const end = this.currentPage * this.itemsPerPage;
+    return end > this.filteredPurchases.length ? this.filteredPurchases.length : end;
   }
 
   // CRUD Operations - Navegación a páginas
@@ -323,16 +371,82 @@ export class PurchaseListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Estado actualizado!',
+            text: `El estado de la compra ${purchase.purchaseCode} ha sido actualizado a "${this.getStatusText(newStatus)}"`,
+            confirmButtonText: 'Continuar',
+            timer: 2000,
+            timerProgressBar: true
+          });
           this.loadData();
         },
         error: (error) => {
           console.error('Error updating purchase status:', error);
-          this.error = 'Error al actualizar el estado de la compra';
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al actualizar el estado de la compra',
+            confirmButtonText: 'Entendido'
+          });
         }
       });
   }
 
-  /**
+  openStatusChangeModal(purchase: PurchaseResponse): void {
+    const statusOptions: { [key: string]: string } = {
+      [PurchaseStatus.PENDIENTE]: 'Pendiente',
+      [PurchaseStatus.APROBADO]: 'Aprobado',
+      [PurchaseStatus.RECHAZADO]: 'Rechazado',
+      [PurchaseStatus.EN_TRANSITO]: 'En Tránsito',
+      [PurchaseStatus.RECIBIDO]: 'Recibido',
+      [PurchaseStatus.CANCELADO]: 'Cancelado',
+      [PurchaseStatus.COMPLETADO]: 'Completado',
+      [PurchaseStatus.PARCIAL]: 'Parcial'
+    };
+
+    // Crear opciones HTML para el select
+    const optionsHtml = Object.entries(statusOptions)
+      .map(([value, text]) =>
+        `<option value="${value}" ${value === purchase.status ? 'selected' : ''}>${text}</option>`
+      ).join('');
+
+    Swal.fire({
+      title: `Cambiar estado de ${purchase.purchaseCode}`,
+      html: `
+        <div class="text-left">
+          <p class="mb-4 text-gray-600">Estado actual: <strong>${this.getStatusText(purchase.status)}</strong></p>
+          <label for="status-select" class="block text-sm font-medium text-gray-700 mb-2">
+            Nuevo estado:
+          </label>
+          <select id="status-select" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            ${optionsHtml}
+          </select>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Actualizar Estado',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        const selectElement = document.getElementById('status-select') as HTMLSelectElement;
+        const newStatus = selectElement.value as PurchaseStatus;
+
+        if (newStatus === purchase.status) {
+          Swal.showValidationMessage('Debes seleccionar un estado diferente al actual');
+          return false;
+        }
+
+        return newStatus;
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.updatePurchaseStatus(purchase, result.value);
+      }
+    });
+  }  /**
    * Obtener el nombre completo del usuario por su ID
    */
   getUserFullName(userId: string): string {

@@ -1,13 +1,13 @@
-<div class="p-6 bg-gray-50 min-h-screen">
+<div class="min-h-screen p-6 transition-colors bg-gray-50 dark:bg-gray-900">
      <!-- Header -->
      <div class="mb-8">
           <div class="flex items-center justify-between">
                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Dashboard de Inventario</h1>
-                    <p class="text-gray-600 mt-2">Gestión de productos, compras y proveedores</p>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard de Inventario</h1>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400">Gestión de productos, compras y proveedores</p>
                </div>
                <button (click)="refresh()"
-                    class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    class="flex items-center px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg shadow-lg dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -20,21 +20,23 @@
 
      <!-- Loading State -->
      <div *ngIf="loading" class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span class="ml-3 text-gray-600">Cargando datos...</span>
+          <div class="w-12 h-12 border-b-2 border-blue-600 rounded-full animate-spin dark:border-blue-400"></div>
+          <span class="ml-3 text-gray-600 dark:text-gray-400">Cargando datos...</span>
      </div>
 
      <!-- Error State -->
-     <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+     <div *ngIf="error && !loading"
+          class="p-4 mb-6 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/30 dark:border-red-800">
           <div class="flex">
-               <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <svg class="w-5 h-5 text-red-400 dark:text-red-300" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
                     </path>
                </svg>
                <div class="ml-3">
-                    <p class="text-red-800 font-medium">Error</p>
-                    <p class="text-red-700 text-sm">{{error}}</p>
+                    <p class="font-medium text-red-800 dark:text-red-300">Error</p>
+                    <p class="text-sm text-red-700 dark:text-red-400">{{error}}</p>
                </div>
           </div>
      </div>
@@ -42,118 +44,136 @@
      <!-- Content -->
      <div *ngIf="!loading && !error">
           <!-- Quick Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
                <!-- Total Products -->
-               <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+               <div
+                    class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                     <div class="flex items-center">
-                         <div class="p-3 bg-blue-100 rounded-lg">
-                              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <div class="p-3 bg-blue-100 rounded-lg dark:bg-blue-900/30">
+                              <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                   viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                               </svg>
                          </div>
                          <div class="ml-4">
-                              <p class="text-sm text-gray-600">Total Productos</p>
-                              <p class="text-2xl font-bold text-gray-900">{{inventoryStats?.totalProducts || 0}}</p>
+                              <p class="text-sm text-gray-600 dark:text-gray-400">Total Productos</p>
+                              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                   {{inventoryStats?.totalProducts || 0}}</p>
                          </div>
                     </div>
                </div>
 
                <!-- Total Value -->
-               <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+               <div
+                    class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                     <div class="flex items-center">
-                         <div class="p-3 bg-green-100 rounded-lg">
-                              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <div class="p-3 bg-green-100 rounded-lg dark:bg-green-900/30">
+                              <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
+                                   viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
                                    </path>
                               </svg>
                          </div>
                          <div class="ml-4">
-                              <p class="text-sm text-gray-600">Valor Total</p>
-                              <p class="text-2xl font-bold text-gray-900">S/ {{(inventoryStats?.totalValue || 0) |
+                              <p class="text-sm text-gray-600 dark:text-gray-400">Valor Total</p>
+                              <p class="text-2xl font-bold text-gray-900 dark:text-white">S/
+                                   {{(inventoryStats?.totalValue || 0) |
                                    number:'1.2-2'}}</p>
                          </div>
                     </div>
                </div>
 
                <!-- Low Stock -->
-               <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+               <div
+                    class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                     <div class="flex items-center">
-                         <div class="p-3 bg-yellow-100 rounded-lg">
-                              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor"
-                                   viewBox="0 0 24 24">
+                         <div class="p-3 bg-yellow-100 rounded-lg dark:bg-yellow-900/30">
+                              <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none"
+                                   stroke="currentColor" viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
                                    </path>
                               </svg>
                          </div>
                          <div class="ml-4">
-                              <p class="text-sm text-gray-600">Stock Bajo</p>
-                              <p class="text-2xl font-bold text-gray-900">{{inventoryStats?.lowStockCount || 0}}</p>
+                              <p class="text-sm text-gray-600 dark:text-gray-400">Stock Bajo</p>
+                              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                   {{inventoryStats?.lowStockCount || 0}}</p>
                          </div>
                     </div>
                </div>
 
                <!-- Categories -->
-               <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+               <div
+                    class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                     <div class="flex items-center">
-                         <div class="p-3 bg-purple-100 rounded-lg">
-                              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
-                                   viewBox="0 0 24 24">
+                         <div class="p-3 bg-purple-100 rounded-lg dark:bg-purple-900/30">
+                              <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none"
+                                   stroke="currentColor" viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
                                    </path>
                               </svg>
                          </div>
                          <div class="ml-4">
-                              <p class="text-sm text-gray-600">Categorías</p>
-                              <p class="text-2xl font-bold text-gray-900">{{inventoryStats?.categoriesCount || 0}}</p>
+                              <p class="text-sm text-gray-600 dark:text-gray-400">Categorías</p>
+                              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                   {{inventoryStats?.categoriesCount || 0}}</p>
                          </div>
                     </div>
                </div>
           </div>
 
           <!-- Product and Purchase Summary -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
                <!-- Product Summary -->
-               <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Resumen de Productos</h3>
+               <div
+                    class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Resumen de Productos</h3>
                     <div class="space-y-4">
-                         <div class="flex justify-between items-center">
-                              <span class="text-gray-600">Productos Activos</span>
-                              <span class="font-semibold text-green-600">{{productSummary?.activeProducts || 0}}</span>
+                         <div class="flex items-center justify-between">
+                              <span class="text-gray-600 dark:text-gray-400">Productos Activos</span>
+                              <span class="font-semibold text-green-600 dark:text-green-400">{{productSummary?.activeProducts
+                                   || 0}}</span>
                          </div>
-                         <div class="flex justify-between items-center">
-                              <span class="text-gray-600">Stock Bajo</span>
-                              <span class="font-semibold text-yellow-600">{{productSummary?.lowStockProducts ||
+                         <div class="flex items-center justify-between">
+                              <span class="text-gray-600 dark:text-gray-400">Stock Bajo</span>
+                              <span class="font-semibold text-yellow-600 dark:text-yellow-400">{{productSummary?.lowStockProducts
+                                   ||
                                    0}}</span>
                          </div>
-                         <div class="flex justify-between items-center">
-                              <span class="text-gray-600">Sin Stock</span>
-                              <span class="font-semibold text-red-600">{{productSummary?.outOfStockProducts ||
+                         <div class="flex items-center justify-between">
+                              <span class="text-gray-600 dark:text-gray-400">Sin Stock</span>
+                              <span class="font-semibold text-red-600 dark:text-red-400">{{productSummary?.outOfStockProducts
+                                   ||
                                    0}}</span>
                          </div>
                     </div>
                </div>
 
                <!-- Purchase Summary -->
-               <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Resumen de Compras</h3>
+               <div
+                    class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Resumen de Compras</h3>
                     <div class="space-y-4">
-                         <div class="flex justify-between items-center">
-                              <span class="text-gray-600">Compras Pendientes</span>
-                              <span class="font-semibold text-yellow-600">{{purchaseSummary?.pendingPurchases ||
+                         <div class="flex items-center justify-between">
+                              <span class="text-gray-600 dark:text-gray-400">Compras Pendientes</span>
+                              <span class="font-semibold text-yellow-600 dark:text-yellow-400">{{purchaseSummary?.pendingPurchases
+                                   ||
                                    0}}</span>
                          </div>
-                         <div class="flex justify-between items-center">
-                              <span class="text-gray-600">Compras Aprobadas</span>
-                              <span class="font-semibold text-green-600">{{purchaseSummary?.approvedPurchases ||
+                         <div class="flex items-center justify-between">
+                              <span class="text-gray-600 dark:text-gray-400">Compras Aprobadas</span>
+                              <span class="font-semibold text-green-600 dark:text-green-400">{{purchaseSummary?.approvedPurchases
+                                   ||
                                    0}}</span>
                          </div>
-                         <div class="flex justify-between items-center">
-                              <span class="text-gray-600">Monto Total</span>
-                              <span class="font-semibold text-blue-600">S/ {{(purchaseSummary?.totalAmount || 0) |
+                         <div class="flex items-center justify-between">
+                              <span class="text-gray-600 dark:text-gray-400">Monto Total</span>
+                              <span class="font-semibold text-blue-600 dark:text-blue-400">S/
+                                   {{(purchaseSummary?.totalAmount || 0) |
                                    number:'1.2-2'}}</span>
                          </div>
                     </div>
@@ -161,59 +181,63 @@
           </div>
 
           <!-- Quick Actions -->
-          <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-               <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+               <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Acciones Rápidas</h3>
+               <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <button (click)="navigateToProducts()"
-                         class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group">
+                         class="flex items-center justify-center p-4 transition-colors border-2 border-gray-300 border-dashed rounded-lg dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
                          <div class="text-center">
-                              <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-600 mx-auto mb-2" fill="none"
-                                   stroke="currentColor" viewBox="0 0 24 24">
+                              <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                               </svg>
-                              <span class="text-sm font-medium text-gray-600 group-hover:text-blue-600">Gestionar
+                              <span
+                                   class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">Gestionar
                                    Productos</span>
                          </div>
                     </button>
 
                     <button (click)="navigateToCategories()"
-                         class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors group">
+                         class="flex items-center justify-center p-4 transition-colors border-2 border-gray-300 border-dashed rounded-lg dark:border-gray-600 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 group">
                          <div class="text-center">
-                              <svg class="w-8 h-8 text-gray-400 group-hover:text-green-600 mx-auto mb-2" fill="none"
-                                   stroke="currentColor" viewBox="0 0 24 24">
+                              <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 dark:text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400"
+                                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
                                    </path>
                               </svg>
-                              <span class="text-sm font-medium text-gray-600 group-hover:text-green-600">Gestionar
+                              <span
+                                   class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400">Gestionar
                                    Categorías</span>
                          </div>
                     </button>
 
                     <button (click)="navigateToSuppliers()"
-                         class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors group">
+                         class="flex items-center justify-center p-4 transition-colors border-2 border-gray-300 border-dashed rounded-lg dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 group">
                          <div class="text-center">
-                              <svg class="w-8 h-8 text-gray-400 group-hover:text-purple-600 mx-auto mb-2" fill="none"
-                                   stroke="currentColor" viewBox="0 0 24 24">
+                              <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 dark:text-gray-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"
+                                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
                                    </path>
                               </svg>
-                              <span class="text-sm font-medium text-gray-600 group-hover:text-purple-600">Gestionar
+                              <span
+                                   class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400">Gestionar
                                    Proveedores</span>
                          </div>
                     </button>
 
                     <button (click)="navigateToPurchases()"
-                         class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-colors group">
+                         class="flex items-center justify-center p-4 transition-colors border-2 border-gray-300 border-dashed rounded-lg dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 group">
                          <div class="text-center">
-                              <svg class="w-8 h-8 text-gray-400 group-hover:text-orange-600 mx-auto mb-2" fill="none"
-                                   stroke="currentColor" viewBox="0 0 24 24">
+                              <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 dark:text-gray-500 group-hover:text-orange-600 dark:group-hover:text-orange-400"
+                                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                               </svg>
-                              <span class="text-sm font-medium text-gray-600 group-hover:text-orange-600">Gestionar
+                              <span
+                                   class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-orange-600 dark:group-hover:text-orange-400">Gestionar
                                    Compras</span>
                          </div>
                     </button>

@@ -27,6 +27,104 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Estilos mejorados para el dropdown de productos */
+.product-select {
+  position: relative;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #111827;
+  transition: all 0.2s ease-in-out;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.product-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.product-select option {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+}
+
+.product-select option:hover {
+  background-color: #f3f4f6;
+}
+
+.product-select:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Dark mode styles */
+:root.dark .product-select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%9ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+:root.dark .product-select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+:root.dark .product-select option {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+:root.dark .product-select option:hover {
+  background-color: #4b5563;
+}
+
+:root.dark .product-select:disabled {
+  background-color: #1f2937;
+  color: #6b7280;
+}
+
+/* Error states in dark mode */
+.product-select.error-state {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+}
+
+:root.dark .product-select.error-state {
+  border-color: #dc2626 !important;
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+:root.dark .product-select.border-red-300 {
+  border-color: #dc2626 !important;
+  background-color: #374151 !important;
+}
+
+:root.dark .product-select.bg-red-50 {
+  background-color: #374151 !important;
+}
+
+:root.dark .product-select.dark\:border-red-600 {
+  border-color: #dc2626 !important;
+}
+
+:root.dark .product-select.dark\:bg-red-900\/20 {
+  background-color: rgba(153, 27, 27, 0.2) !important;
+}
+
 .btn-primary {
   transition: all 0.2s ease-in-out;
 }

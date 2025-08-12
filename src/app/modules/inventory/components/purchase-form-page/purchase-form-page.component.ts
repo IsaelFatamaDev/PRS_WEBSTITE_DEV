@@ -275,9 +275,44 @@ export class PurchaseFormPageComponent implements OnInit, OnDestroy {
      }
 
      /**
+      * Obtener productos disponibles para un detalle específico (excluyendo productos ya seleccionados)
+      */
+     getAvailableProductsForDetail(currentIndex: number): ProductResponse[] {
+          const selectedProductIds = this.purchaseDetails
+               .map((detail, index) => index !== currentIndex ? detail.productId : null)
+               .filter(id => id && id.trim() !== '');
+
+          return this.filteredProducts.filter(product =>
+               !selectedProductIds.includes(product.productId)
+          );
+     }
+
+     /**
+      * Verificar si un producto ya está seleccionado en otro detalle
+      */
+     isProductAlreadySelected(productId: string, currentIndex: number): boolean {
+          return this.purchaseDetails.some((detail, index) =>
+               index !== currentIndex && detail.productId === productId
+          );
+     }
+
+     /**
       * Manejo del cambio de producto en un detalle
       */
      onProductChange(detail: PurchaseDetailForm, index: number): void {
+          // Verificar si el producto ya está seleccionado en otro detalle
+          if (detail.productId && this.isProductAlreadySelected(detail.productId, index)) {
+               Swal.fire({
+                    icon: 'warning',
+                    title: 'Producto duplicado',
+                    text: 'Este producto ya está seleccionado en otro item. Por favor, selecciona un producto diferente.',
+                    confirmButtonText: 'Entendido'
+               });
+               detail.productId = '';
+               detail.unitPrice = 0;
+               return;
+          }
+
           const product = this.products.find(p => p.productId === detail.productId);
           if (product) {
                // Asignar precio automáticamente desde el producto
