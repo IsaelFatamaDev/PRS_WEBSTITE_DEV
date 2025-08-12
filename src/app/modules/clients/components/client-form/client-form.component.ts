@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { UserService } from '../../../../core/services/user.service';
 import { OrganizationResolverService, OrganizationData, ZoneData, StreetData } from '../../../../core/services/organization-resolver.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { ReniecService } from '../../../../core/services/reniec.service';
 import {
   UserCreateDTO,
   UserResponseDTO,
@@ -39,8 +40,30 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   organizations: OrganizationData[] = [];
   zones: ZoneData[] = [];
   streets: StreetData[] = [];
+  loadingStreets = false;
+
+  // Estados para RENIEC
+  isConsultingReniec = false;
+  reniecDataFound = false;
 
   errors: any = {};
+
+  /**
+   * Obtener zonas filtradas por organización
+   */
+  get filteredZones(): ZoneData[] {
+    // Ya están filtradas desde el servicio por la organización actual
+    return this.zones;
+  }
+
+  /**
+   * Obtener calles filtradas por zona
+   */
+  get filteredStreets(): StreetData[] {
+    const zoneId = this.clientForm.get('zoneId')?.value;
+    if (!zoneId) return [];
+    return this.streets.filter(street => street.zoneId === zoneId);
+  }
 
   passwordStrength = {
     hasLowercase: false,
@@ -48,14 +71,19 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     hasNumber: false,
     hasSpecial: false,
     isValidLength: false
-  }; constructor(
+  };
+
+  // Control de visibilidad de contraseñas
+  showPassword = false;
+  showConfirmPassword = false; constructor(
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
     private organizationResolver: OrganizationResolverService,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private reniecService: ReniecService
   ) {
   } ngOnInit(): void {
     this.clientId = this.route.snapshot.paramMap.get('id');
@@ -79,23 +107,47 @@ export class ClientFormComponent implements OnInit, OnDestroy {
    * Cargar datos de organizaciones, zonas y calles
    */
   private loadOrganizationData(): void {
-    // Cargar organizaciones
-    console.log('🔄 Cargando organizaciones...');
+    const currentOrganizationId = this.authService.getCurrentOrganizationId();
+
+    if (!currentOrganizationId) {
+      console.error('❌ No se encontró organizationId del usuario actual');
+      this.notificationService.error(
+        'Error de sesión',
+        'No se pudo obtener la organización del usuario actual'
+      );
+      return;
+    }
+
+    // Cargar la organización específica del usuario
+    console.log('🔄 Cargando organización actual:', currentOrganizationId);
     this.organizationResolver.getAllOrganizations().pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (organizations) => {
-        console.log('✅ Organizaciones cargadas:', organizations);
-        this.organizations = organizations;
+        // Filtrar solo la organización del usuario actual
+        this.organizations = organizations.filter(org => org.organizationId === currentOrganizationId);
+        console.log('✅ Organización cargada:', this.organizations);
+
+        if (this.organizations.length === 0) {
+          console.error('❌ No se encontró la organización del usuario');
+          this.notificationService.error(
+            'Error',
+            'No se encontró información de la organización del usuario'
+          );
+        }
       },
       error: (error) => {
-        console.error('❌ Error loading organizations:', error);
+        console.error('❌ Error loading organization:', error);
+        this.notificationService.error(
+          'Error',
+          'No se pudo cargar la información de la organización'
+        );
       }
     });
 
-    // Cargar todas las zonas
-    console.log('🔄 Cargando zonas...');
-    this.organizationResolver.getAllZones().pipe(
+    // Cargar zonas de la organización específica
+    console.log('🔄 Cargando zonas de la organización:', currentOrganizationId);
+    this.organizationResolver.getZonesByOrganization(currentOrganizationId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (zones) => {
@@ -104,18 +156,27 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('❌ Error loading zones:', error);
+        this.notificationService.error(
+          'Error',
+          'No se pudieron cargar las zonas de la organización'
+        );
       }
     });
 
-    // Cargar todas las calles
+    // Cargar todas las calles (se filtrarán por zona cuando se seleccione)
     this.organizationResolver.getAllStreets().pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (streets) => {
         this.streets = streets;
+        console.log('✅ Calles cargadas:', streets.length);
       },
       error: (error) => {
-        console.error('Error loading streets:', error);
+        console.error('❌ Error loading streets:', error);
+        this.notificationService.error(
+          'Error',
+          'No se pudieron cargar las calles'
+        );
       }
     });
   }
@@ -154,6 +215,10 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     }
 
     if (this.isEditMode) {
+      // En modo edición: bloquear username para no permitir cambios
+      this.clientForm.get('username')?.disable();
+
+      // Remover validaciones de password ya que no se editarán
       this.clientForm.removeControl('password');
       this.clientForm.removeControl('confirmPassword');
     } else {
@@ -166,12 +231,60 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Configurar listener para cambios en DNI (tanto para crear como editar)
+    this.clientForm.get('documentNumber')?.valueChanges.pipe(
+      takeUntil(this.destroy$),
+      debounceTime(500), // Esperar 500ms después de que el usuario deje de escribir
+      distinctUntilChanged()
+    ).subscribe(dni => {
+      // Solo consultar automáticamente si es DNI válido y el tipo de documento es DNI
+      if (this.clientForm.get('documentType')?.value === 'DNI' &&
+        dni &&
+        dni.length === 8 &&
+        /^\d{8}$/.test(dni)) {
+        console.log('🔍 DNI válido detectado, consultando automáticamente:', dni);
+        this.consultReniecIfDniValid(dni);
+      }
+    });
+
     this.clientForm.get('documentType')?.valueChanges.pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
       const documentNumberControl = this.clientForm.get('documentNumber');
       if (documentNumberControl) {
         documentNumberControl.updateValueAndValidity();
+      }
+    });
+
+    // Limpiar calle cuando cambie la zona y cargar nuevas calles
+    this.clientForm.get('zoneId')?.valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((zoneId) => {
+      console.log('🔄 Cambio de zona detectado:', zoneId);
+
+      // Limpiar calle seleccionada
+      this.clientForm.patchValue({
+        streetId: ''
+      });
+
+      // Cargar calles de la nueva zona
+      if (zoneId) {
+        this.loadingStreets = true;
+        this.organizationResolver.getStreetsByZone(zoneId).subscribe({
+          next: (streets) => {
+            this.streets = streets;
+            this.loadingStreets = false;
+            console.log('✅ Calles cargadas para zona:', zoneId, streets);
+          },
+          error: (error) => {
+            console.error('❌ Error al cargar calles por zona:', error);
+            this.streets = [];
+            this.loadingStreets = false;
+          }
+        });
+      } else {
+        this.streets = [];
+        this.loadingStreets = false;
       }
     });
   }
@@ -345,6 +458,9 @@ export class ClientFormComponent implements OnInit, OnDestroy {
    * Poblar formulario con datos del cliente
    */
   private populateForm(client: UserResponseDTO): void {
+    console.log('🔄 Poblando formulario con datos del cliente:', client);
+
+    // Primero asignar todos los datos básicos
     this.clientForm.patchValue({
       firstName: client.firstName,
       lastName: client.lastName,
@@ -354,10 +470,38 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       phone: client.phone,
       organizationId: client.organizationId,
       streetAddress: client.streetAddress,
-      streetId: client.streetId,
-      zoneId: client.zoneId,
       username: client.username
     });
+
+    // Asignar zona inmediatamente
+    if (client.zoneId) {
+      this.clientForm.patchValue({ zoneId: client.zoneId });
+      console.log('✅ Zona asignada:', client.zoneId);
+    }
+
+    // Para la calle, necesitamos asegurar que las calles estén cargadas
+    if (client.streetId) {
+      // Si las calles ya están cargadas, asignar directamente
+      if (this.streets.length > 0) {
+        this.clientForm.patchValue({ streetId: client.streetId });
+        console.log('✅ Calle asignada inmediatamente:', client.streetId);
+      } else {
+        // Si no están cargadas, esperar a que se carguen
+        console.log('⏳ Esperando que se carguen las calles para asignar:', client.streetId);
+        const streetSubscription = this.organizationResolver.getAllStreets().subscribe({
+          next: (streets) => {
+            this.streets = streets;
+            console.log('✅ Calles cargadas, asignando calle:', client.streetId);
+            this.clientForm.patchValue({ streetId: client.streetId });
+            streetSubscription.unsubscribe(); // Desuscribirse después de usar
+          },
+          error: (error) => {
+            console.error('❌ Error cargando calles para asignación:', error);
+            streetSubscription.unsubscribe();
+          }
+        });
+      }
+    }
   }
 
   /**
@@ -393,7 +537,8 @@ export class ClientFormComponent implements OnInit, OnDestroy {
    * Crear nuevo cliente
    */
   private createClient(): void {
-    const formValue = this.clientForm.value;
+    // Usar getRawValue() para obtener también los campos deshabilitados (RENIEC)
+    const formValue = this.clientForm.getRawValue();
 
     // Obtener organizationId del control deshabilitado
     const organizationId = this.clientForm.get('organizationId')?.value || this.getCurrentOrganizationId();
@@ -412,7 +557,9 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       username: formValue.username,
       password: formValue.password,
       roles: [RolesUsers.CLIENT]
-    }; this.userService.createUser(clientData).pipe(
+    };
+
+    console.log('🚀 Enviando datos del cliente:', clientData); this.userService.createUser(clientData).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (response) => {
@@ -584,5 +731,173 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       return this.isEditMode ? 'Actualizando...' : 'Creando...';
     }
     return this.isEditMode ? 'Actualizar Cliente' : 'Crear Cliente';
+  }
+
+  /**
+   * Consultar RENIEC si el DNI es válido
+   */
+  private consultReniecIfDniValid(documentNumber: string): void {
+    // Solo consultar si es modo creación y el tipo de documento es DNI
+    if (this.isEditMode) return;
+
+    const documentType = this.clientForm.get('documentType')?.value;
+    if (documentType !== DocumentType.DNI) return;
+
+    // Validar que el DNI tenga el formato correcto
+    if (!documentNumber || documentNumber.length !== 8 || !/^\d{8}$/.test(documentNumber)) {
+      this.reniecDataFound = false;
+      return;
+    }
+
+    // Evitar consultas si ya estamos consultando
+    if (this.isConsultingReniec) return;
+
+    this.consultReniec(documentNumber);
+  }
+
+  /**
+   * Consultar datos en RENIEC
+   */
+  private consultReniec(dni: string): void {
+    this.isConsultingReniec = true;
+    this.reniecDataFound = false;
+
+    console.log('🔍 Consultando RENIEC para DNI:', dni);
+
+    this.reniecService.getPersonalDataByDni(dni).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (personalData) => {
+        console.log('✅ Datos de RENIEC obtenidos:', personalData);
+        this.populateFormWithReniecData(personalData);
+        this.reniecDataFound = true;
+        this.isConsultingReniec = false;
+
+        this.notificationService.success(
+          'Datos encontrados',
+          `Se encontraron los datos de ${personalData.fullName} en RENIEC`
+        );
+      },
+      error: (error) => {
+        console.error('❌ Error consultando RENIEC:', error);
+        this.isConsultingReniec = false;
+        this.reniecDataFound = false;
+
+        // Solo mostrar error si es diferente a "no encontrado"
+        if (!error.message?.includes('No se encontraron datos')) {
+          this.notificationService.warning(
+            'Error en RENIEC',
+            error.message || 'No se pudo consultar los datos de RENIEC'
+          );
+        }
+      }
+    });
+  }
+
+  /**
+   * Consultar RENIEC manualmente mediante botón
+   */
+  consultReniecManually(): void {
+    const documentNumber = this.clientForm.get('documentNumber')?.value;
+    const documentType = this.clientForm.get('documentType')?.value;
+
+    if (documentType !== DocumentType.DNI) {
+      this.notificationService.warning(
+        'Solo DNI',
+        'La consulta RENIEC solo está disponible para DNI'
+      );
+      return;
+    }
+
+    if (!documentNumber || documentNumber.length !== 8 || !/^\d{8}$/.test(documentNumber)) {
+      this.notificationService.warning(
+        'DNI inválido',
+        'Ingrese un DNI válido de 8 dígitos'
+      );
+      return;
+    }
+
+    this.consultReniec(documentNumber);
+  }
+  private populateFormWithReniecData(personalData: any): void {
+    // Actualizar siempre con datos de RENIEC
+    this.clientForm.patchValue({
+      firstName: personalData.firstName,
+      lastName: personalData.lastName,
+      username: personalData.generatedUsername
+    });
+
+    // Deshabilitar campos que vienen de RENIEC para evitar modificaciones
+    this.clientForm.get('firstName')?.disable();
+    this.clientForm.get('lastName')?.disable();
+    this.clientForm.get('username')?.disable();
+
+    // Marcar los campos como tocados para mostrar validación
+    this.clientForm.get('firstName')?.markAsTouched();
+    this.clientForm.get('lastName')?.markAsTouched();
+    this.clientForm.get('username')?.markAsTouched();
+  }
+
+  /**
+   * Habilitar campos para edición manual si no hay datos de RENIEC
+   */
+  private enableManualEditing(): void {
+    this.clientForm.get('firstName')?.enable();
+    this.clientForm.get('lastName')?.enable();
+    this.clientForm.get('username')?.enable();
+  }
+
+  /**
+   * Limpiar datos de RENIEC y habilitar edición manual
+   */
+  clearReniecData(): void {
+    this.reniecDataFound = false;
+    this.clientForm.patchValue({
+      firstName: '',
+      lastName: '',
+      username: ''
+    });
+    this.enableManualEditing();
+
+    this.notificationService.info(
+      'Datos limpiados',
+      'Ahora puede ingresar los datos manualmente'
+    );
+  }
+
+  /**
+   * Alternar visibilidad de la contraseña
+   */
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  /**
+   * Alternar visibilidad de confirmar contraseña
+   */
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  /**
+   * Limitar caracteres en input de DNI (máximo 8)
+   */
+  limitDniInput(event: any): void {
+    const value = event.target.value;
+    if (value.length > 8) {
+      event.target.value = value.slice(0, 8);
+      this.clientForm.get('documentNumber')?.setValue(value.slice(0, 8));
+    }
+  }
+
+  /**
+   * Limitar caracteres en input de teléfono (máximo 9)
+   */
+  limitPhoneInput(event: any): void {
+    const value = event.target.value;
+    if (value.length > 9) {
+      event.target.value = value.slice(0, 9);
+      this.clientForm.get('phone')?.setValue(value.slice(0, 9));
+    }
   }
 }

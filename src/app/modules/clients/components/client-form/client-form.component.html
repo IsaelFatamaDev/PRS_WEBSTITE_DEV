@@ -1,449 +1,651 @@
-<div class="min-h-screen p-4 bg-gray-50 dark:bg-gray-900 sm:p-6 lg:p-8">
-     <div class="max-w-4xl mx-auto">
+<div
+     class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 sm:p-6 lg:p-8">
+     <div class="max-w-5xl mx-auto">
+          <!-- Header profesional -->
           <div
-               class="p-6 mb-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-               <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                         <h1 class="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                              <button (click)="onCancel()"
-                                   class="flex items-center justify-center w-10 h-10 transition-colors duration-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl">
-                                   <i class="text-gray-600 fas fa-arrow-left dark:text-gray-300"></i>
-                              </button>
-                              <div
-                                   class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
-                                   <i class="text-lg text-white fas fa-user-plus" *ngIf="!isEditMode"></i>
-                                   <i class="text-lg text-white fas fa-user-edit" *ngIf="isEditMode"></i>
-                              </div>
-                              {{ pageTitle }}
-                         </h1>
-                         <p class="mt-1 text-gray-600 dark:text-gray-400">
-                              {{ isEditMode ? 'Modifica los datos del cliente' : 'Completa la información para crear un
-                              nuevo cliente' }}
-                         </p>
+               class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-3xl p-6 mb-8">
+               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                         <button (click)="onCancel()"
+                              class="flex items-center justify-center w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-2xl transition-all duration-200 group">
+                              <i
+                                   class="text-gray-600 dark:text-gray-300 fas fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
+                         </button>
+                         <div>
+                              <h1
+                                   class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                   {{ pageTitle }}
+                              </h1>
+                              <p class="text-gray-600 dark:text-gray-400 mt-1">
+                                   {{ isEditMode ? 'Actualiza la información del cliente' : 'Crea un nuevo cliente para
+                                   tu organización' }}
+                              </p>
+                         </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                         <div
+                              class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl">
+                              <span class="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                   <i class="fas fa-building mr-2"></i>
+                                   {{ organizations.length > 0 ? organizations[0].organizationName : 'Cargando...' }}
+                              </span>
+                         </div>
                     </div>
                </div>
           </div>
 
+          <!-- Indicador de carga -->
           <div *ngIf="isLoading"
-               class="p-12 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-               <div class="flex items-center justify-center">
-                    <div class="flex items-center gap-3">
-                         <div class="w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-                         <span class="text-gray-600 dark:text-gray-400">Cargando datos del cliente...</span>
+               class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-3xl p-12">
+               <div class="flex flex-col items-center justify-center gap-6">
+                    <div class="relative">
+                         <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin">
+                         </div>
+                         <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-purple-600 rounded-full animate-spin"
+                              style="animation-delay: -0.15s;"></div>
+                    </div>
+                    <div class="text-center">
+                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Cargando información</h3>
+                         <p class="text-gray-600 dark:text-gray-400">Obteniendo datos del cliente...</p>
                     </div>
                </div>
           </div>
-          <form *ngIf="!isLoading && isFormInitialized" [formGroup]="clientForm" (ngSubmit)="onSubmit()"
-               class="p-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
 
+          <!-- Formulario principal -->
+          <form *ngIf="!isLoading && isFormInitialized" [formGroup]="clientForm" (ngSubmit)="onSubmit()"
+               class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-3xl overflow-hidden">
+
+               <!-- Mensaje de error general -->
                <div *ngIf="errors.general"
-                    class="p-4 mb-6 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded-xl">
+                    class="p-6 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
                     <div class="flex items-center gap-3">
-                         <i class="text-red-600 fas fa-exclamation-triangle dark:text-red-400"></i>
-                         <span class="text-red-700 dark:text-red-300">{{ errors.general }}</span>
+                         <i class="text-red-600 dark:text-red-400 fas fa-exclamation-triangle text-lg"></i>
+                         <div>
+                              <h4 class="font-semibold text-red-800 dark:text-red-200">Error en el formulario</h4>
+                              <p class="text-red-700 dark:text-red-300">{{ errors.general }}</p>
+                         </div>
                     </div>
                </div>
 
-               <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                    <div>
-                         <h3
-                              class="flex items-center gap-2 mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                              <i class="text-blue-600 fas fa-user dark:text-blue-400"></i>
-                              Información Personal
-                         </h3>
+               <div class="p-8">
+                    <!-- Sección 1: Información Personal -->
+                    <div class="mb-12">
+                         <div class="flex items-center gap-3 mb-8">
+                              <div
+                                   class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                   <i class="text-white fas fa-user text-lg"></i>
+                              </div>
+                              <div>
+                                   <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Información Personal
+                                   </h2>
+                                   <p class="text-sm text-gray-600 dark:text-gray-400">Datos personales del cliente</p>
+                              </div>
+                         </div>
 
-                         <div class="space-y-6">
-                              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                   <div>
-                                        <label for="firstName"
-                                             class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                             Nombres <span class="text-red-500">*</span>
-                                        </label> <input type="text" id="firstName" formControlName="firstName"
-                                             [class.border-red-300]="hasError('firstName')"
-                                             [class.dark:border-red-600]="hasError('firstName')"
-                                             [class.border-green-300]="!hasError('firstName') && clientForm.get('firstName')?.valid && clientForm.get('firstName')?.value"
-                                             [class.dark:border-green-600]="!hasError('firstName') && clientForm.get('firstName')?.valid && clientForm.get('firstName')?.value"
-                                             class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                             placeholder="Ingrese los nombres">
-                                        <p *ngIf="hasError('firstName')"
-                                             class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                             {{ getErrorMessage('firstName') }}
-                                        </p>
-                                   </div>
-
-                                   <div>
-                                        <label for="lastName"
-                                             class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                             Apellidos <span class="text-red-500">*</span>
-                                        </label> <input type="text" id="lastName" formControlName="lastName"
-                                             [class.border-red-300]="hasError('lastName')"
-                                             [class.dark:border-red-600]="hasError('lastName')"
-                                             [class.border-green-300]="!hasError('lastName') && clientForm.get('lastName')?.valid && clientForm.get('lastName')?.value"
-                                             [class.dark:border-green-600]="!hasError('lastName') && clientForm.get('lastName')?.valid && clientForm.get('lastName')?.value"
-                                             class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                             placeholder="Ingrese los apellidos">
-                                        <p *ngIf="hasError('lastName')"
-                                             class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                             {{ getErrorMessage('lastName') }}
-                                        </p>
-                                   </div>
+                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                              <!-- Tipo de Documento -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-id-card text-gray-400"></i>
+                                        Tipo de Documento
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <select formControlName="documentType"
+                                        [class.border-red-300]="hasError('documentType')"
+                                        [class.focus:ring-red-500]="hasError('documentType')"
+                                        [class.border-green-300]="!hasError('documentType') && clientForm.get('documentType')?.valid && clientForm.get('documentType')?.value"
+                                        [class.focus:ring-green-500]="!hasError('documentType') && clientForm.get('documentType')?.valid && clientForm.get('documentType')?.value"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none">
+                                        <option value="">Seleccione...</option>
+                                        <option value="DNI">DNI</option>
+                                        <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
+                                   </select>
+                                   <p *ngIf="hasError('documentType')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('documentType') }}
+                                   </p>
                               </div>
 
-                              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                   <div>
-                                        <label for="documentType"
-                                             class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                             Tipo de Documento <span class="text-red-500">*</span>
-                                        </label>
-                                        <select id="documentType" formControlName="documentType"
-                                             [class.border-red-300]="hasError('documentType')"
-                                             [class.dark:border-red-600]="hasError('documentType')"
-                                             class="w-full px-4 py-3 text-gray-900 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                             <option value="">Seleccione tipo</option>
-                                             <option value="DNI">DNI</option>
-                                             <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
-                                        </select>
-                                        <p *ngIf="hasError('documentType')"
-                                             class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                             {{ getErrorMessage('documentType') }}
-                                        </p>
-                                   </div>
-                                   <div>
-                                        <label for="documentNumber"
-                                             class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                             Número de Documento <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="text" id="documentNumber" formControlName="documentNumber"
+                              <!-- Número de Documento con RENIEC -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-hashtag text-gray-400"></i>
+                                        Número de Documento
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <div class="relative">
+                                        <input type="text" formControlName="documentNumber"
                                              [class.border-red-300]="hasError('documentNumber')"
-                                             [class.dark:border-red-600]="hasError('documentNumber')"
+                                             [class.focus:ring-red-500]="hasError('documentNumber')"
                                              [class.border-green-300]="!hasError('documentNumber') && clientForm.get('documentNumber')?.valid && clientForm.get('documentNumber')?.value"
-                                             [class.dark:border-green-600]="!hasError('documentNumber') && clientForm.get('documentNumber')?.valid && clientForm.get('documentNumber')?.value"
-                                             class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                             [class.focus:ring-green-500]="!hasError('documentNumber') && clientForm.get('documentNumber')?.valid && clientForm.get('documentNumber')?.value"
+                                             [class.pr-32]="clientForm.get('documentType')?.value === 'DNI'"
+                                             (input)="clientForm.get('documentType')?.value === 'DNI' ? limitDniInput($event) : null"
+                                             [maxlength]="clientForm.get('documentType')?.value === 'DNI' ? 8 : 20"
+                                             class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                              [placeholder]="clientForm.get('documentType')?.value === 'DNI' ? '12345678' : 'ABC123DEF456'">
 
-                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400"
-                                             *ngIf="!hasError('documentNumber')">
-                                             <span *ngIf="clientForm.get('documentType')?.value === 'DNI'">
-                                                  <i class="mr-1 fas fa-info-circle"></i>
-                                                  Formato: 8 dígitos (ej: 12345678)
-                                             </span>
-                                             <span
-                                                  *ngIf="clientForm.get('documentType')?.value === 'CARNET_EXTRANJERIA'">
-                                                  <i class="mr-1 fas fa-info-circle"></i>
-                                                  Formato: Hasta 20 caracteres alfanuméricos
-                                             </span>
-                                        </div>
-
-                                        <p *ngIf="hasError('documentNumber')"
-                                             class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                             {{ getErrorMessage('documentNumber') }}
-                                        </p>
+                                        <!-- Botón RENIEC -->
+                                        <button *ngIf="clientForm.get('documentType')?.value === 'DNI'" type="button"
+                                             (click)="consultReniecManually()"
+                                             [disabled]="isConsultingReniec || !clientForm.get('documentNumber')?.value"
+                                             class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:cursor-not-allowed">
+                                             <i *ngIf="!isConsultingReniec" class="fas fa-search mr-1"></i>
+                                             <i *ngIf="isConsultingReniec" class="fas fa-spinner animate-spin mr-1"></i>
+                                             {{ isConsultingReniec ? 'Consultando...' : 'RENIEC' }}
+                                        </button>
                                    </div>
+
+                                   <!-- Indicadores de estado RENIEC -->
+                                   <div *ngIf="isConsultingReniec"
+                                        class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                                        <i class="fas fa-spinner animate-spin"></i>
+                                        <span>Consultando datos en RENIEC...</span>
+                                   </div>
+
+                                   <div *ngIf="reniecDataFound && !isConsultingReniec"
+                                        class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                                             <i class="fas fa-check-circle"></i>
+                                             <span>Datos obtenidos de RENIEC</span>
+                                        </div>
+                                        <button type="button" (click)="clearReniecData()"
+                                             class="text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                                             <i class="fas fa-times mr-1"></i>
+                                             Limpiar
+                                        </button>
+                                   </div>
+
+                                   <p *ngIf="hasError('documentNumber')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('documentNumber') }}
+                                   </p>
+                              </div>
+
+                              <!-- Status Badge -->
+                              <div class="flex items-end">
+                                   <div *ngIf="clientForm.get('documentType')?.value === 'DNI'"
+                                        class="w-full p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                                        <div class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                                             <i class="fas fa-info-circle"></i>
+                                             <span>Los datos se consultarán automáticamente en RENIEC</span>
+                                        </div>
+                                   </div>
+                              </div>
+                         </div>
+
+                         <!-- Nombres y Apellidos -->
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                              <!-- Nombres -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                        Nombres
+                                        <span class="text-red-500">*</span>
+                                        <span *ngIf="clientForm.get('firstName')?.disabled"
+                                             class="ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs rounded-md">
+                                             <i class="fas fa-lock mr-1"></i>
+                                             RENIEC
+                                        </span>
+                                   </label>
+                                   <input type="text" formControlName="firstName"
+                                        [class.border-red-300]="hasError('firstName')"
+                                        [class.focus:ring-red-500]="hasError('firstName')"
+                                        [class.border-green-300]="!hasError('firstName') && clientForm.get('firstName')?.valid && clientForm.get('firstName')?.value"
+                                        [class.focus:ring-green-500]="!hasError('firstName') && clientForm.get('firstName')?.valid && clientForm.get('firstName')?.value"
+                                        [class.bg-gray-50]="clientForm.get('firstName')?.disabled"
+                                        [class.dark:bg-gray-600]="clientForm.get('firstName')?.disabled"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:cursor-not-allowed"
+                                        placeholder="Ingrese los nombres">
+                                   <p *ngIf="hasError('firstName')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('firstName') }}
+                                   </p>
+                              </div>
+
+                              <!-- Apellidos -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-user-tag text-gray-400"></i>
+                                        Apellidos
+                                        <span class="text-red-500">*</span>
+                                        <span *ngIf="clientForm.get('lastName')?.disabled"
+                                             class="ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs rounded-md">
+                                             <i class="fas fa-lock mr-1"></i>
+                                             RENIEC
+                                        </span>
+                                   </label>
+                                   <input type="text" formControlName="lastName"
+                                        [class.border-red-300]="hasError('lastName')"
+                                        [class.focus:ring-red-500]="hasError('lastName')"
+                                        [class.border-green-300]="!hasError('lastName') && clientForm.get('lastName')?.valid && clientForm.get('lastName')?.value"
+                                        [class.focus:ring-green-500]="!hasError('lastName') && clientForm.get('lastName')?.valid && clientForm.get('lastName')?.value"
+                                        [class.bg-gray-50]="clientForm.get('lastName')?.disabled"
+                                        [class.dark:bg-gray-600]="clientForm.get('lastName')?.disabled"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:cursor-not-allowed"
+                                        placeholder="Ingrese los apellidos">
+                                   <p *ngIf="hasError('lastName')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('lastName') }}
+                                   </p>
                               </div>
                          </div>
                     </div>
 
-                    <div>
-                         <h3
-                              class="flex items-center gap-2 mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                              <i class="text-green-600 fas fa-envelope dark:text-green-400"></i>
-                              Información de Contacto
-                         </h3>
-
-                         <div class="space-y-6">
+                    <!-- Sección 2: Información de Contacto -->
+                    <div class="mb-12">
+                         <div class="flex items-center gap-3 mb-8">
+                              <div
+                                   class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                                   <i class="text-white fas fa-envelope text-lg"></i>
+                              </div>
                               <div>
-                                   <label for="email"
-                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Correo Electrónico <span class="text-red-500">*</span>
-                                   </label> <input type="email" id="email" formControlName="email"
+                                   <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Información de
+                                        Contacto
+                                   </h2>
+                                   <p class="text-sm text-gray-600 dark:text-gray-400">Datos de comunicación</p>
+                              </div>
+                         </div>
+
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                              <!-- Email -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-at text-gray-400"></i>
+                                        Correo Electrónico
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <input type="email" formControlName="email"
                                         [class.border-red-300]="hasError('email')"
-                                        [class.dark:border-red-600]="hasError('email')"
+                                        [class.focus:ring-red-500]="hasError('email')"
                                         [class.border-green-300]="!hasError('email') && clientForm.get('email')?.valid && clientForm.get('email')?.value"
-                                        [class.dark:border-green-600]="!hasError('email') && clientForm.get('email')?.valid && clientForm.get('email')?.value"
-                                        class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        [class.focus:ring-green-500]="!hasError('email') && clientForm.get('email')?.valid && clientForm.get('email')?.value"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         placeholder="ejemplo@correo.com">
-                                   <p *ngIf="hasError('email')" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                   <p *ngIf="hasError('email')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
                                         {{ getErrorMessage('email') }}
                                    </p>
                               </div>
 
-                              <div>
-                                   <label for="phone"
-                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Teléfono <span class="text-red-500">*</span>
-                                   </label> <input type="tel" id="phone" formControlName="phone"
-                                        [class.border-red-300]="hasError('phone')"
-                                        [class.dark:border-red-600]="hasError('phone')"
+                              <!-- Teléfono -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-phone text-gray-400"></i>
+                                        Teléfono
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <input type="tel" formControlName="phone" [class.border-red-300]="hasError('phone')"
+                                        [class.focus:ring-red-500]="hasError('phone')"
                                         [class.border-green-300]="!hasError('phone') && clientForm.get('phone')?.valid && clientForm.get('phone')?.value"
-                                        [class.dark:border-green-600]="!hasError('phone') && clientForm.get('phone')?.valid && clientForm.get('phone')?.value"
-                                        class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        [class.focus:ring-green-500]="!hasError('phone') && clientForm.get('phone')?.valid && clientForm.get('phone')?.value"
+                                        (input)="limitPhoneInput($event)" maxlength="9"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         placeholder="987654321">
-
-                                   <div class="mt-1 text-xs text-gray-500 dark:text-gray-400"
-                                        *ngIf="!hasError('phone')">
-                                        <i class="mr-1 fas fa-info-circle"></i>
-                                        Debe empezar con 9 y tener 9 dígitos
+                                   <div *ngIf="!hasError('phone')"
+                                        class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Debe empezar con 9 y tener 9 dígitos</span>
                                    </div>
-                                   <p *ngIf="hasError('phone')" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                   <p *ngIf="hasError('phone')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
                                         {{ getErrorMessage('phone') }}
                                    </p>
                               </div>
                          </div>
                     </div>
-               </div>
 
-               <div class="mt-8">
-                    <h3 class="flex items-center gap-2 mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                         <i class="text-purple-600 fas fa-map-marker-alt dark:text-purple-400"></i>
-                         Dirección
-                    </h3>
-
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-                         <!-- Dirección de la calle -->
-                         <div class="lg:col-span-2">
-                              <label for="streetAddress"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Dirección <span class="text-red-500">*</span>
-                              </label>
-                              <input type="text" id="streetAddress" formControlName="streetAddress"
-                                   [class.border-red-300]="hasError('streetAddress')"
-                                   [class.dark:border-red-600]="hasError('streetAddress')"
-                                   class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Jr. Los Álamos 123">
-                              <p *ngIf="hasError('streetAddress')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('streetAddress') }}
-                              </p>
+                    <!-- Sección 3: Ubicación -->
+                    <div class="mb-12">
+                         <div class="flex items-center gap-3 mb-8">
+                              <div
+                                   class="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                   <i class="text-white fas fa-map-marker-alt text-lg"></i>
+                              </div>
+                              <div>
+                                   <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Información de
+                                        Ubicación
+                                   </h2>
+                                   <p class="text-sm text-gray-600 dark:text-gray-400">Dirección y ubicación específica
+                                   </p>
+                              </div>
                          </div>
 
-                         <!-- Selector de Organización -->
-                         <div>
-                              <label for="organizationId"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Organización <span class="text-red-500">*</span>
-                              </label>
-                              <select id="organizationId" formControlName="organizationId"
-                                   [class.border-red-300]="hasError('organizationId')"
-                                   [class.dark:border-red-600]="hasError('organizationId')"
-                                   class="w-full px-4 py-3 text-gray-900 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
-                                   <option value="">Seleccionar organización</option>
-                                   <option *ngFor="let org of organizations" [value]="org.organizationId">
-                                        {{ org.organizationName }}
-                                   </option>
-                              </select>
-                              <p *ngIf="hasError('organizationId')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('organizationId') }}
-                              </p>
-                         </div>
-
-                         <!-- Selector de Zona -->
-                         <div>
-                              <label for="zoneId"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Zona <span class="text-red-500">*</span>
-                              </label>
-                              <select id="zoneId" formControlName="zoneId" [class.border-red-300]="hasError('zoneId')"
-                                   [class.dark:border-red-600]="hasError('zoneId')"
-                                   class="w-full px-4 py-3 text-gray-900 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
-                                   <option value="">Seleccionar zona</option>
-                                   <option *ngFor="let zone of zones" [value]="zone.zoneId">
-                                        {{ zone.zoneName }}
-                                   </option>
-                              </select>
-                              <p *ngIf="hasError('zoneId')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('zoneId') }}
-                              </p>
-                         </div>
-                    </div>
-
-                    <!-- Segunda fila para la calle -->
-                    <div class="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
-                         <!-- Selector de Calle -->
-                         <div>
-                              <label for="streetId"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Calle <span class="text-red-500">*</span>
-                              </label>
-                              <select id="streetId" formControlName="streetId"
-                                   [class.border-red-300]="hasError('streetId')"
-                                   [class.dark:border-red-600]="hasError('streetId')"
-                                   class="w-full px-4 py-3 text-gray-900 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
-                                   <option value="">Seleccionar calle</option>
-                                   <option *ngFor="let street of streets" [value]="street.streetId">
-                                        {{ street.streetName }}
-                                   </option>
-                              </select>
-                              <p *ngIf="hasError('streetId')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('streetId') }}
-                              </p>
-                         </div>
-                    </div>
-               </div>
-
-               <div *ngIf="!isEditMode" class="mt-8">
-                    <h3 class="flex items-center gap-2 mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                         <i class="text-yellow-600 fas fa-key dark:text-yellow-400"></i>
-                         Credenciales de Acceso
-                    </h3>
-
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                         <div>
-                              <label for="username"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Nombre de Usuario <span class="text-red-500">*</span>
-                              </label>
-                              <input type="text" id="username" formControlName="username"
-                                   [class.border-red-300]="hasError('username')"
-                                   [class.dark:border-red-600]="hasError('username')"
-                                   class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="usuario123">
-                              <p *ngIf="hasError('username')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('username') }}
-                              </p>
-                         </div>
-                         <div>
-                              <label for="password"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Contraseña <span class="text-red-500">*</span>
-                              </label>
-                              <input type="password" id="password" formControlName="password"
-                                   [class.border-red-300]="hasError('password')"
-                                   [class.dark:border-red-600]="hasError('password')"
-                                   class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="••••••••">
-
-                              <div class="mt-3 space-y-2" *ngIf="clientForm.get('password')?.value">
-
-                                   <div class="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                                        <div class="h-2 transition-all duration-300 rounded-full"
-                                             [class]="passwordStrengthClass"
-                                             [style.width.%]="(passwordCriteriaCount / 5) * 100">
-                                        </div>
-                                   </div>
-
-                                   <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium"
-                                             [class]="passwordStrengthClass.replace('bg-', 'text-')">
-                                             {{ passwordStrengthText }}
-                                        </span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">
-                                             {{ passwordCriteriaCount }}/5 criterios
-                                        </span>
-                                   </div>
-
-                                   <div class="grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
-                                        <div class="flex items-center gap-2">
-                                             <i class="text-green-500 fas fa-check-circle"
-                                                  *ngIf="passwordStrength.hasLowercase"></i>
-                                             <i class="text-gray-400 fas fa-times-circle"
-                                                  *ngIf="!passwordStrength.hasLowercase"></i>
-                                             <span [class.text-green-600]="passwordStrength.hasLowercase"
-                                                  [class.text-gray-500]="!passwordStrength.hasLowercase">
-                                                  Una minúscula
-                                             </span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                             <i class="text-green-500 fas fa-check-circle"
-                                                  *ngIf="passwordStrength.hasUppercase"></i>
-                                             <i class="text-gray-400 fas fa-times-circle"
-                                                  *ngIf="!passwordStrength.hasUppercase"></i>
-                                             <span [class.text-green-600]="passwordStrength.hasUppercase"
-                                                  [class.text-gray-500]="!passwordStrength.hasUppercase">
-                                                  Una mayúscula
-                                             </span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                             <i class="text-green-500 fas fa-check-circle"
-                                                  *ngIf="passwordStrength.hasNumber"></i>
-                                             <i class="text-gray-400 fas fa-times-circle"
-                                                  *ngIf="!passwordStrength.hasNumber"></i>
-                                             <span [class.text-green-600]="passwordStrength.hasNumber"
-                                                  [class.text-gray-500]="!passwordStrength.hasNumber">
-                                                  Un número
-                                             </span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                             <i class="text-green-500 fas fa-check-circle"
-                                                  *ngIf="passwordStrength.hasSpecial"></i>
-                                             <i class="text-gray-400 fas fa-times-circle"
-                                                  *ngIf="!passwordStrength.hasSpecial"></i>
-                                             <span [class.text-green-600]="passwordStrength.hasSpecial"
-                                                  [class.text-gray-500]="!passwordStrength.hasSpecial">
-                                                  Un símbolo
-                                             </span>
-                                        </div>
-                                        <div class="flex items-center gap-2 sm:col-span-2">
-                                             <i class="text-green-500 fas fa-check-circle"
-                                                  *ngIf="passwordStrength.isValidLength"></i>
-                                             <i class="text-gray-400 fas fa-times-circle"
-                                                  *ngIf="!passwordStrength.isValidLength"></i>
-                                             <span [class.text-green-600]="passwordStrength.isValidLength"
-                                                  [class.text-gray-500]="!passwordStrength.isValidLength">
-                                                  Mínimo 8 caracteres
-                                             </span>
-                                        </div>
-                                   </div>
+                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                              <!-- Dirección -->
+                              <div class="lg:col-span-3 space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-map text-gray-400"></i>
+                                        Dirección Completa
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <input type="text" formControlName="streetAddress"
+                                        [class.border-red-300]="hasError('streetAddress')"
+                                        [class.focus:ring-red-500]="hasError('streetAddress')"
+                                        [class.border-green-300]="!hasError('streetAddress') && clientForm.get('streetAddress')?.valid && clientForm.get('streetAddress')?.value"
+                                        [class.focus:ring-green-500]="!hasError('streetAddress') && clientForm.get('streetAddress')?.valid && clientForm.get('streetAddress')?.value"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="Jr. Los Álamos 123, Mz. A Lote 15">
+                                   <p *ngIf="hasError('streetAddress')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('streetAddress') }}
+                                   </p>
                               </div>
 
-                              <p *ngIf="hasError('password')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('password') }}
-                              </p>
+                              <!-- Zona -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-layer-group text-gray-400"></i>
+                                        Zona
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <select formControlName="zoneId" [class.border-red-300]="hasError('zoneId')"
+                                        [class.focus:ring-red-500]="hasError('zoneId')"
+                                        [class.border-green-300]="!hasError('zoneId') && clientForm.get('zoneId')?.valid && clientForm.get('zoneId')?.value"
+                                        [class.focus:ring-green-500]="!hasError('zoneId') && clientForm.get('zoneId')?.valid && clientForm.get('zoneId')?.value"
+                                        [disabled]="zones.length === 0"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <option value="">{{ zones.length === 0 ? 'Cargando zonas...' : 'Seleccionar
+                                             zona' }}
+                                        </option>
+                                        <option *ngFor="let zone of zones" [value]="zone.zoneId">{{ zone.zoneName }}
+                                        </option>
+                                   </select>
+                                   <p *ngIf="hasError('zoneId')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('zoneId') }}
+                                   </p>
+                              </div>
+
+                              <!-- Calle -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-road text-gray-400"></i>
+                                        Calle
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <select formControlName="streetId" [class.border-red-300]="hasError('streetId')"
+                                        [class.focus:ring-red-500]="hasError('streetId')"
+                                        [class.border-green-300]="!hasError('streetId') && clientForm.get('streetId')?.valid && clientForm.get('streetId')?.value"
+                                        [class.focus:ring-green-500]="!hasError('streetId') && clientForm.get('streetId')?.valid && clientForm.get('streetId')?.value"
+                                        [disabled]="!clientForm.get('zoneId')?.value || loadingStreets"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <option value="">{{ loadingStreets ? 'Cargando calles...' :
+                                             (!clientForm.get('zoneId')?.value ? 'Primero seleccione una zona' :
+                                             'Seleccionar calle') }}</option>
+                                        <option *ngFor="let street of filteredStreets" [value]="street.streetId">{{
+                                             street.streetName }}</option>
+                                   </select>
+                                   <p *ngIf="hasError('streetId')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('streetId') }}
+                                   </p>
+                              </div>
+                         </div>
+                    </div>
+
+                    <!-- Sección 4: Credenciales de Acceso (Solo para nuevos clientes) -->
+                    <div *ngIf="!isEditMode" class="mb-12">
+                         <div class="flex items-center gap-3 mb-8">
+                              <div
+                                   class="w-10 h-10 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
+                                   <i class="text-white fas fa-key text-lg"></i>
+                              </div>
+                              <div>
+                                   <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Credenciales de Acceso
+                                   </h2>
+                                   <p class="text-sm text-gray-600 dark:text-gray-400">Datos para el acceso al sistema
+                                   </p>
+                              </div>
                          </div>
 
-                         <div>
-                              <label for="confirmPassword"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Confirmar Contraseña <span class="text-red-500">*</span>
-                              </label>
-                              <input type="password" id="confirmPassword" formControlName="confirmPassword"
-                                   [class.border-red-300]="hasError('confirmPassword') || clientForm.errors?.['passwordMismatch']"
-                                   [class.dark:border-red-600]="hasError('confirmPassword') || clientForm.errors?.['passwordMismatch']"
-                                   class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="••••••••">
-                              <p *ngIf="hasError('confirmPassword') || clientForm.errors?.['passwordMismatch']"
-                                   class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('confirmPassword') }}
-                              </p>
+                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                              <!-- Username -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-user-circle text-gray-400"></i>
+                                        Nombre de Usuario
+                                        <span class="text-red-500">*</span>
+                                        <span *ngIf="clientForm.get('username')?.disabled"
+                                             class="ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs rounded-md">
+                                             <i class="fas fa-lock mr-1"></i>
+                                             AUTO
+                                        </span>
+                                   </label>
+                                   <input type="text" formControlName="username"
+                                        [class.border-red-300]="hasError('username')"
+                                        [class.focus:ring-red-500]="hasError('username')"
+                                        [class.border-green-300]="!hasError('username') && clientForm.get('username')?.valid && clientForm.get('username')?.value"
+                                        [class.focus:ring-green-500]="!hasError('username') && clientForm.get('username')?.valid && clientForm.get('username')?.value"
+                                        [class.bg-gray-50]="clientForm.get('username')?.disabled"
+                                        [class.dark:bg-gray-600]="clientForm.get('username')?.disabled"
+                                        class="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:cursor-not-allowed"
+                                        placeholder="usuario123">
+                                   <div *ngIf="!hasError('username') && !clientForm.get('username')?.disabled"
+                                        class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Entre 3 y 20 caracteres</span>
+                                   </div>
+                                   <p *ngIf="hasError('username')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('username') }}
+                                   </p>
+                              </div>
+
+                              <!-- Password -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-lock text-gray-400"></i>
+                                        Contraseña
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <div class="relative">
+                                        <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                                             [class.border-red-300]="hasError('password')"
+                                             [class.focus:ring-red-500]="hasError('password')"
+                                             [class.border-green-300]="!hasError('password') && clientForm.get('password')?.valid && clientForm.get('password')?.value"
+                                             [class.focus:ring-green-500]="!hasError('password') && clientForm.get('password')?.valid && clientForm.get('password')?.value"
+                                             class="w-full px-4 py-3.5 pr-12 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                             placeholder="••••••••">
+
+                                        <!-- Botón para mostrar/ocultar contraseña -->
+                                        <button type="button" (click)="togglePasswordVisibility()"
+                                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                             <i class="fas" [class.fa-eye]="!showPassword"
+                                                  [class.fa-eye-slash]="showPassword"></i>
+                                        </button>
+                                   </div>
+
+                                   <!-- Indicador de fortaleza de contraseña -->
+                                   <div *ngIf="clientForm.get('password')?.value" class="mt-3 space-y-3">
+                                        <div class="flex items-center justify-between">
+                                             <span class="text-sm font-medium"
+                                                  [class]="passwordStrengthClass.replace('bg-', 'text-')">
+                                                  {{ passwordStrengthText }}
+                                             </span>
+                                             <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                  {{ passwordCriteriaCount }}/5 criterios
+                                             </span>
+                                        </div>
+                                        <div
+                                             class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                             <div class="h-full transition-all duration-300 rounded-full"
+                                                  [class]="passwordStrengthClass"
+                                                  [style.width.%]="(passwordCriteriaCount / 5) * 100">
+                                             </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                             <div class="flex items-center gap-2"
+                                                  [class.text-green-600]="passwordStrength.hasLowercase"
+                                                  [class.text-gray-500]="!passwordStrength.hasLowercase">
+                                                  <i class="fas fa-check-circle"
+                                                       *ngIf="passwordStrength.hasLowercase"></i>
+                                                  <i class="fas fa-times-circle"
+                                                       *ngIf="!passwordStrength.hasLowercase"></i>
+                                                  <span>Minúscula</span>
+                                             </div>
+                                             <div class="flex items-center gap-2"
+                                                  [class.text-green-600]="passwordStrength.hasUppercase"
+                                                  [class.text-gray-500]="!passwordStrength.hasUppercase">
+                                                  <i class="fas fa-check-circle"
+                                                       *ngIf="passwordStrength.hasUppercase"></i>
+                                                  <i class="fas fa-times-circle"
+                                                       *ngIf="!passwordStrength.hasUppercase"></i>
+                                                  <span>Mayúscula</span>
+                                             </div>
+                                             <div class="flex items-center gap-2"
+                                                  [class.text-green-600]="passwordStrength.hasNumber"
+                                                  [class.text-gray-500]="!passwordStrength.hasNumber">
+                                                  <i class="fas fa-check-circle" *ngIf="passwordStrength.hasNumber"></i>
+                                                  <i class="fas fa-times-circle"
+                                                       *ngIf="!passwordStrength.hasNumber"></i>
+                                                  <span>Número</span>
+                                             </div>
+                                             <div class="flex items-center gap-2"
+                                                  [class.text-green-600]="passwordStrength.hasSpecial"
+                                                  [class.text-gray-500]="!passwordStrength.hasSpecial">
+                                                  <i class="fas fa-check-circle"
+                                                       *ngIf="passwordStrength.hasSpecial"></i>
+                                                  <i class="fas fa-times-circle"
+                                                       *ngIf="!passwordStrength.hasSpecial"></i>
+                                                  <span>Símbolo</span>
+                                             </div>
+                                             <div class="flex items-center gap-2 col-span-2"
+                                                  [class.text-green-600]="passwordStrength.isValidLength"
+                                                  [class.text-gray-500]="!passwordStrength.isValidLength">
+                                                  <i class="fas fa-check-circle"
+                                                       *ngIf="passwordStrength.isValidLength"></i>
+                                                  <i class="fas fa-times-circle"
+                                                       *ngIf="!passwordStrength.isValidLength"></i>
+                                                  <span>Mínimo 8 caracteres</span>
+                                             </div>
+                                        </div>
+                                   </div>
+
+                                   <p *ngIf="hasError('password')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('password') }}
+                                   </p>
+                              </div>
+
+                              <!-- Confirmar Password -->
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-shield-alt text-gray-400"></i>
+                                        Confirmar Contraseña
+                                        <span class="text-red-500">*</span>
+                                   </label>
+                                   <div class="relative">
+                                        <input [type]="showConfirmPassword ? 'text' : 'password'"
+                                             formControlName="confirmPassword"
+                                             [class.border-red-300]="hasError('confirmPassword') || clientForm.errors?.['passwordMismatch']"
+                                             [class.focus:ring-red-500]="hasError('confirmPassword') || clientForm.errors?.['passwordMismatch']"
+                                             [class.border-green-300]="!hasError('confirmPassword') && !clientForm.errors?.['passwordMismatch'] && clientForm.get('confirmPassword')?.valid && clientForm.get('confirmPassword')?.value"
+                                             [class.focus:ring-green-500]="!hasError('confirmPassword') && !clientForm.errors?.['passwordMismatch'] && clientForm.get('confirmPassword')?.valid && clientForm.get('confirmPassword')?.value"
+                                             class="w-full px-4 py-3.5 pr-12 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                             placeholder="••••••••">
+
+                                        <!-- Botón para mostrar/ocultar confirmar contraseña -->
+                                        <button type="button" (click)="toggleConfirmPasswordVisibility()"
+                                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                             <i class="fas" [class.fa-eye]="!showConfirmPassword"
+                                                  [class.fa-eye-slash]="showConfirmPassword"></i>
+                                        </button>
+                                   </div>
+                                   <p *ngIf="hasError('confirmPassword') || clientForm.errors?.['passwordMismatch']"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('confirmPassword') }}
+                                   </p>
+                              </div>
+                         </div>
+                    </div>
+
+                    <!-- Sección 5: Username para modo edición -->
+                    <div *ngIf="isEditMode" class="mb-12">
+                         <div class="flex items-center gap-3 mb-8">
+                              <div
+                                   class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                                   <i class="text-white fas fa-user-cog text-lg"></i>
+                              </div>
+                              <div>
+                                   <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Credenciales</h2>
+                                   <p class="text-sm text-gray-600 dark:text-gray-400">Información de acceso al sistema
+                                   </p>
+                              </div>
+                         </div>
+
+                         <div class="max-w-md">
+                              <div class="space-y-2">
+                                   <label
+                                        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <i class="fas fa-user-circle text-gray-400"></i>
+                                        Nombre de Usuario
+                                        <span class="text-red-500">*</span>
+                                        <span
+                                             class="ml-2 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-md">
+                                             <i class="fas fa-lock mr-1"></i>
+                                             NO EDITABLE
+                                        </span>
+                                   </label>
+                                   <input type="text" formControlName="username"
+                                        [class.bg-gray-50]="clientForm.get('username')?.disabled"
+                                        [class.dark:bg-gray-600]="clientForm.get('username')?.disabled"
+                                        class="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 placeholder-gray-500 dark:placeholder-gray-400 cursor-not-allowed"
+                                        placeholder="usuario123" readonly>
+                                   <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>El nombre de usuario no puede modificarse</span>
+                                   </div>
+                                   <p *ngIf="hasError('username')"
+                                        class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ getErrorMessage('username') }}
+                                   </p>
+                              </div>
                          </div>
                     </div>
                </div>
 
-               <div *ngIf="isEditMode" class="mt-8">
-                    <h3 class="flex items-center gap-2 mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                         <i class="text-indigo-600 fas fa-user-cog dark:text-indigo-400"></i>
-                         Credenciales
-                    </h3>
+               <!-- Botones de acción -->
+               <div class="px-8 py-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:justify-end">
+                         <button type="button" (click)="onCancel()" [disabled]="isSaving"
+                              class="px-6 py-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                              <i class="fas fa-times mr-2"></i>
+                              Cancelar
+                         </button>
 
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                         <div>
-                              <label for="username"
-                                   class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                   Nombre de Usuario <span class="text-red-500">*</span>
-                              </label>
-                              <input type="text" id="username" formControlName="username"
-                                   [class.border-red-300]="hasError('username')"
-                                   [class.dark:border-red-600]="hasError('username')"
-                                   class="w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-white border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="usuario123">
-                              <p *ngIf="hasError('username')" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                   {{ getErrorMessage('username') }}
-                              </p>
-                         </div>
+                         <button type="submit" [disabled]="clientForm.invalid || isSaving"
+                              class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
+                              <i *ngIf="!isSaving" class="fas fa-save"></i>
+                              <i *ngIf="isSaving" class="fas fa-spinner animate-spin"></i>
+                              {{ submitButtonText }}
+                         </button>
                     </div>
-               </div>
-
-               <div
-                    class="flex flex-col justify-end gap-4 pt-6 mt-8 border-t border-gray-200 sm:flex-row dark:border-gray-700">
-                    <button type="button" (click)="onCancel()" [disabled]="isSaving"
-                         class="px-6 py-3 font-medium text-gray-700 transition-colors duration-200 border border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
-                         Cancelar
-                    </button>
-
-                    <button type="submit" [disabled]="clientForm.invalid || isSaving"
-                         class="flex items-center justify-center gap-2 px-6 py-3 font-medium text-white transition-all duration-200 transform shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
-                         <i class="fas fa-spinner animate-spin" *ngIf="isSaving"></i>
-                         <i class="fas fa-save" *ngIf="!isSaving"></i>
-                         {{ submitButtonText }}
-                    </button>
                </div>
           </form>
      </div>
