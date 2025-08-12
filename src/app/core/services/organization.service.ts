@@ -45,13 +45,13 @@ export class OrganizationService {
 
 
   deleteOrganization(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/delete`, {}).pipe(
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl.organizations}/delete/${id}`, {}).pipe(
       map(response => response.data)
     );
   }
 
   restoreOrganization(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/restore`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/restore/${id}`, {}).pipe(
       map(response => response.data)
     );
   }
@@ -83,13 +83,13 @@ export class OrganizationService {
   }
 
   deleteZones(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.zonas}/${id}/desactivate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.zonas}/delete/${id}`, {}).pipe(
       map(response => response.data)
     );
   }
 
   restoreZones(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.zonas}/${id}/activate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.zonas}/restore/${id}`, {}).pipe(
       map(response => response.data)
     );
   }
@@ -123,13 +123,13 @@ export class OrganizationService {
   }
 
   deleteStreet(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.street}/${id}/desactivate`, {}).pipe(
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl.street}/delete/${id}`, {}).pipe(
       map(response => response.data)
     );
   }
 
   restoreStreet(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.street}/${id}/activate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.street}/restore/${id}`, {}).pipe(
       map(response => response.data)
     );
   }
